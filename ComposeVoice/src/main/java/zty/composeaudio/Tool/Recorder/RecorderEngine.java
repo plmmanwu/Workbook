@@ -39,7 +39,7 @@ public class RecorderEngine {
     private static RecorderEngine instance;
 
     private RecorderEngine() {
-        audioManager = (AudioManager) CommonApplication.getInstance()
+        audioManager = (AudioManager) CommonApplication.getContext()
                 .getSystemService(Context.AUDIO_SERVICE);
 
         handler = new Handler();

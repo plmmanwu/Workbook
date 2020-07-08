@@ -1,6 +1,6 @@
 package com.Tool.Function;
 
-import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 
 import com.Tool.Global.Variable;
@@ -35,7 +35,7 @@ public class FileFunction {
         }
     }
 
-    public static void InitStorage(Application application) {
+    public static void InitStorage(Context application) {
         if (!FileFunction.IsExitsSdcard()) {
             Variable.StorageDirectoryPath = application.getFilesDir().getAbsolutePath();
         } else {

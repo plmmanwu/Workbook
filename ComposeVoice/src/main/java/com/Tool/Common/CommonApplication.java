@@ -1,6 +1,6 @@
 package com.Tool.Common;
 
-import android.app.Application;
+import android.content.Context;
 import android.os.StrictMode;
 import android.view.Gravity;
 import android.widget.Toast;
@@ -8,25 +8,40 @@ import android.widget.Toast;
 import com.Tool.Function.CommonFunction;
 import com.Tool.Function.InitFunction;
 import com.Tool.Global.Constant;
-import com.noopluz.hoopluzlibrary.WRCoreApp;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by 郑童宇 on 2016/05/24.
  */
-public class CommonApplication extends Application {
-    private boolean initialised;
-    private boolean initialisedInUiThread;
+public class CommonApplication {
+    private static boolean initialised;
+    private static boolean initialisedInUiThread;
 
     private Toast messageToast;
     private Toast longMessageToast;
 
-    private static CommonApplication instance;
+    private static Context ctx;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    private volatile static CommonApplication instance = null;
 
-        instance = this;
+    public static CommonApplication getInstance() {
+        if (instance == null) {
+            synchronized (CommonApplication.class) {
+                if (instance==null) {
+                    instance = new CommonApplication();
+                }
+            }
+        }
+
+        return instance;
+    }
+
+
+    public static synchronized void initialise(Context context) {
+        WeakReference<Context> contextWeakReference = new WeakReference<>(context);
+        ctx = contextWeakReference.get();
+//        instance = ctx;
 
         if (CommonFunction.isEmpty(CommonFunction.GetPackageName())) {
             // 百度定位sdk定位服务或者类似启动remote service的第三方库运行在一个单独的进程
@@ -38,13 +53,10 @@ public class CommonApplication extends Application {
 
         initialised = false;
         initialisedInUiThread = false;
-    }
-
-    public synchronized void initialise() {
         if (!initialised) {
             initialised = true;
 
-            InitFunction.Initialise(this);
+            InitFunction.Initialise(ctx);
 
             if (Constant.Debug) {
                 StrictMode.ThreadPolicy.Builder threadPolicyBuilder =
@@ -61,13 +73,14 @@ public class CommonApplication extends Application {
         if (!initialisedInUiThread) {
             initialisedInUiThread = true;
 
-            messageToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
-            longMessageToast = Toast.makeText(this, "", Toast.LENGTH_LONG);
+            messageToast = Toast.makeText(ctx, "", Toast.LENGTH_SHORT);
+            longMessageToast = Toast.makeText(ctx, "", Toast.LENGTH_LONG);
         }
     }
 
-    public static WRCoreApp getInstance() {
-        return WRCoreApp.getInstance();
+    public static Context getContext() {
+        checkNotNull(ctx);
+        return ctx;
     }
 
     public synchronized boolean isInitialised() {
@@ -75,6 +88,7 @@ public class CommonApplication extends Application {
     }
 
     public void showToast(String text, String source) {
+        checkNotNull(ctx);
         showToast(text, source, false);
     }
 
@@ -84,7 +98,7 @@ public class CommonApplication extends Application {
         }
 
         if (messageToast == null) {
-            messageToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
+            messageToast = Toast.makeText(ctx, "", Toast.LENGTH_SHORT);
         }
 
         messageToast.setText(text);
@@ -102,7 +116,7 @@ public class CommonApplication extends Application {
 
         if (isLong) {
             if (longMessageToast == null) {
-                longMessageToast = Toast.makeText(this, "", Toast.LENGTH_LONG);
+                longMessageToast = Toast.makeText(ctx, "", Toast.LENGTH_LONG);
             }
 
             longMessageToast.setText(text);
@@ -110,7 +124,7 @@ public class CommonApplication extends Application {
             longMessageToast.show();
         } else {
             if (messageToast == null) {
-                messageToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
+                messageToast = Toast.makeText(ctx, "", Toast.LENGTH_SHORT);
             }
 
             messageToast.setText(text);
@@ -118,4 +132,11 @@ public class CommonApplication extends Application {
             messageToast.show();
         }
     }
+
+    private static void checkNotNull(Object o) {
+        if (o==null) {
+            throw new NullPointerException("context not null, please init CommonApplication first");
+        }
+    }
+
 }

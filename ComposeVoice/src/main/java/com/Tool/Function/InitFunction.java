@@ -1,6 +1,6 @@
 package com.Tool.Function;
 
-import android.app.Application;
+import android.content.Context;
 
 import com.Tool.Global.Variable;
 
@@ -18,7 +18,7 @@ public class InitFunction {
         }
     }
 
-    public static synchronized void Initialise(Application application) {
+    public static synchronized void Initialise(Context application) {
         TestCPU();
 
         FileFunction.InitStorage(application);

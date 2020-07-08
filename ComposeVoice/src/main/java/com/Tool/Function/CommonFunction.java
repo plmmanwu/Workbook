@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.Tool.Common.CommonApplication;
-import com.noopluz.safetymanagement.common.toast.ToastUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
@@ -61,7 +60,7 @@ public class CommonFunction {
 
     public static String GetPackageName() {
         String processName = "";
-        ActivityManager activityManager = (ActivityManager) CommonApplication.getInstance()
+        ActivityManager activityManager = (ActivityManager) CommonApplication.getContext()
                 .getSystemService(Context.ACTIVITY_SERVICE);
         Iterator<ActivityManager.RunningAppProcessInfo> infoIterator =
                 activityManager.getRunningAppProcesses().iterator();
@@ -84,11 +83,11 @@ public class CommonFunction {
     }
 
     public static void showToast(String text, String source) {
-        ToastUtils.show(source+"=="+text);
+        CommonApplication.getInstance().showToast(text,source);
     }
 
     public static void showToast(String text, String source, boolean debug) {
-        ToastUtils.show(source+"=="+text);
+        CommonApplication.getInstance().showToast(text,source);
     }
 
     public static byte[] GetBytes(short shortValue, boolean bigEnding) {
@@ -190,6 +189,6 @@ public class CommonFunction {
     }
 
     public static int getColorByResourceId(int id) {
-        return CommonApplication.getInstance().getResources().getColor(id);
+        return CommonApplication.getContext().getResources().getColor(id);
     }
 }

@@ -3,7 +3,7 @@ package com.Tool.Function;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.noopluz.safetymanagement.common.toast.ToastUtils;
+import com.Tool.Common.CommonApplication;
 
 
 /**
@@ -20,14 +20,15 @@ public class UpdateFunction {
         }
 
         if (CommonFunction.IsInMainThread()) {
-            ToastUtils.show("UpdateFunction"+"=="+toastString);
+            CommonApplication.getInstance().showToast(toastString,"UpdateFunction");
+
         } else {
             Handler handler = new Handler(Looper.getMainLooper());
 
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ToastUtils.show("UpdateFunction"+"=="+toastString);
+                    CommonApplication.getInstance().showToast(toastString,"UpdateFunction");
                 }
             });
         }
