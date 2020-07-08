@@ -1,2 +1,4 @@
+include ':base'
+include ':composevoice'
 include ':app'
 rootProject.name = "Workbook"
