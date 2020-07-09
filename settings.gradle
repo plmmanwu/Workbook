@@ -1,3 +1,4 @@
+include ':imageloader'
 include ':base'
 include ':composevoice'
 include ':app'

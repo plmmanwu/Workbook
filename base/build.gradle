@@ -32,9 +32,9 @@ dependencies {
 
     implementation depend["rxjava"]
     api depend["butterknife"]
-    api depend["butterknife-compiler"]
+    annotationProcessor depend["butterknife-compiler"]
     implementation depend["rxandroid"]
-    implementation depend["glide-compiler"]
+    annotationProcessor depend["glide-compiler"]
     implementation depend["glide"]
     implementation depend["okhttp"]
     implementation depend["retrofit"]
