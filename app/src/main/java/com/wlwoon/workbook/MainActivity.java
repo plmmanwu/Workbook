@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
     }
 
     @Override
-    public void result(Intent intent) {
+    public void result(Intent intent,int code) {
         if (intent != null) {
             Bundle extras = intent.getExtras();
             String text = extras.getString("text");

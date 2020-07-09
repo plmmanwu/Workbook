@@ -160,7 +160,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == code) {
-            callback.result(data);
+            callback.result(data,requestCode);
         }
     }
 

@@ -7,5 +7,5 @@ import android.content.Intent;
  */
 
 public interface ActivityForResultCallback {
-    void result(Intent intent);
+    void result(Intent intent,int requestCode);
 }
