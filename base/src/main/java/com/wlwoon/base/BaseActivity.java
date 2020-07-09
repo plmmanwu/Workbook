@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 
 import com.wlwoon.base.common.BitmapUtil;
 import com.wlwoon.base.common.StatusBarUtils;
+import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
 
@@ -46,9 +48,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         Intent intent = getIntent();
         initData(savedInstanceState, intent==null?null:intent.getExtras());//初始化数据
         setStatusBarStyle();
+        AppManage.getInstance().inStack(this);
     }
 
     private void setStatusBarStyle() {
+        final Handler handler = new Handler();
         View decorView = getWindow().getDecorView();
         decorView.post(new Runnable() {
             @Override
@@ -60,6 +64,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 } else {
                     StatusBarUtils.setLightMode(mActivity);
                 }
+                bitmap.recycle();
+//                handler.postDelayed(this, 1000);
             }
         });
     }
@@ -81,6 +87,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (mBind != null) {
             mBind.unbind();
         }
+        AppManage.getInstance().outStack(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ToastUtil.getInstance().cancel();
     }
 
     //点击EditText以外的区域隐藏软键盘

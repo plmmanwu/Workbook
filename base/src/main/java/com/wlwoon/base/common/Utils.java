@@ -18,6 +18,12 @@ public class Utils {
         }
     }
 
+    public static void checkNullReturn(Object o) {
+        if (o==null) {
+            return;
+        }
+    }
+
 //    public static Bundle getBundle(Object... objects) {
 //
 //    }

@@ -5,7 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="#000"
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/tv_tip"
@@ -23,6 +32,15 @@
         android:layout_marginTop="20dp"
         android:id="@+id/btn_jump"
         android:text="跳转"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:id="@+id/btn_bg"
+        android:text="切换背景"
         />
 
 </LinearLayout>
