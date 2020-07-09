@@ -14,6 +14,8 @@ import android.widget.EditText;
 
 import com.wlwoon.base.common.BitmapUtil;
 import com.wlwoon.base.common.StatusBarUtils;
+import com.wlwoon.base.common.Utils;
+import com.wlwoon.base.interfaces.ActivityForResultCallback;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     private Unbinder mBind;
     protected Context mContext;
     protected Activity mActivity;
+    private ActivityForResultCallback callback;
+    private int code;//requestCode
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +43,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         mBind = ButterKnife.bind(this);
         StatusBarUtils.setTransparentForWindow(this);//透明状态栏
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//竖屏
-        initData(savedInstanceState, getIntent().getExtras());//初始化数据
+        Intent intent = getIntent();
+        initData(savedInstanceState, intent==null?null:intent.getExtras());//初始化数据
         setStatusBarStyle();
     }
 
@@ -125,16 +130,52 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void startActivity(Context context, Class<?> cls) {
-        startActivityWithData(context,cls,null);
+        startActivityWithData(context, cls, null);
     }
 
     protected void startActivityWithData(Context context, Class<?> cls, Bundle bundle) {
         Intent intent = new Intent(context, cls);
         if (bundle != null) {
-            intent.putExtra("extra", bundle);
+            intent.putExtras(bundle);
         }
         startActivity(intent);
     }
 
+    protected void startActivityForResultWithData(Context context, Class<?> cls, Bundle bundle, int code, ActivityForResultCallback callback) {
+        Utils.checkNotNull(callback);
+        this.callback = callback;
+        this.code = code;
+        Intent intent = new Intent(context, cls);
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
+        startActivityForResult(intent, code);
+    }
+
+    protected void startActivityForResult(Context context, Class<?> cls, int code, ActivityForResultCallback callback) {
+        startActivityForResultWithData(context, cls, null, code, callback);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == code) {
+            callback.result(data);
+        }
+    }
+
+    protected void finishActivity() {
+        finishActivityWithData(null);
+    }
+
+    protected void finishActivityWithData(Bundle bundle) {
+        Intent intent = null;
+        if (bundle != null) {
+            intent = new Intent();
+            intent.putExtras(bundle);
+        }
+        setResult(RESULT_OK, intent);
+        finish();
+    }
 
 }
