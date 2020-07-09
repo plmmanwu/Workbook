@@ -2,7 +2,9 @@ package com.wlwoon.workbook;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -39,12 +41,33 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                change = !change;
-                if (change) {
-                    view.setVisibility(View.VISIBLE);
-                } else {
-                    view.setVisibility(View.GONE);
-                }
+
+                TextView textView = new TextView(mContext);
+                textView.setTextSize(20);
+                textView.setTextColor(getResources().getColor(R.color.colorAccent));
+                textView.setText("嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻");
+                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                textView.setLayoutParams(params);
+                ViewGroup rootView = (ViewGroup) mTvTip.getRootView();
+                int left = mButton.getLeft();
+                int top = mButton.getTop();
+                int right = mButton.getRight();
+                int bottom = mButton.getBottom();
+                int height = textView.getHeight();
+                int width = textView.getWidth();
+                textView.layout(left,bottom,left+50,bottom+50);
+                rootView.addView(textView,params);
+
+                Log.i("wu.xy", "he:" + height + "width=" + width);
+
+
+
+//                change = !change;
+//                if (change) {
+//                    view.setVisibility(View.VISIBLE);
+//                } else {
+//                    view.setVisibility(View.GONE);
+//                }
             }
         });
 
