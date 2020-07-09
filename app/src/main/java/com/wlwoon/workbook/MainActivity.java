@@ -9,11 +9,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
+import com.wlwoon.contactspicker.Contact;
+import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
 import com.wlwoon.imageloader.ImageLoaderOptions;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +61,12 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+//                Intent intent = new Intent(mContext, ContactsPickActivity.class);
+////                intent.setComponent(new ComponentName("com.wlwoon.contactspicker", "com.wlwoon.contactspicker.ContactsPickActivity"));
+//                startActivity(intent);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isMultipleChoice",true);
+                startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,MainActivity.this);
                 TextView textView = new TextView(mContext);
                 textView.setTextSize(20);
                 textView.setTextColor(getResources().getColor(R.color.colorAccent));
@@ -101,8 +111,9 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
     public void result(Intent intent, int code) {
         if (intent != null) {
             Bundle extras = intent.getExtras();
-            String text = extras.getString("text");
-            mTvTip.append(text);
+//            String text = extras.getString("text");
+            ArrayList<Contact> listContacts = extras.getParcelableArrayList("listContacts");
+            mTvTip.append(new Gson().toJson(listContacts));
         }
     }
 
