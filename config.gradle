@@ -44,8 +44,8 @@ ext{
             "converter-gson"                       : "com.squareup.retrofit2:converter-gson:2.4.0",
             "adapter-rxjava"                       : "com.squareup.retrofit2:adapter-rxjava2:2.4.0",
             //glide图片加载
-            "glide"                                : "com.github.bumptech.glide:glide:4.6.1",
-            "glide-compiler"                       : "com.github.bumptech.glide:compiler:4.6.1",
+            "glide"                                : "com.github.bumptech.glide:glide:4.11.0",
+            "glide-compiler"                       : "com.github.bumptech.glide:compiler:4.11.0",
             "glide-annotations"                       : "com.github.bumptech.glide:annotations:4.6.1",
             "glide-okhttp3"                       : "com.github.bumptech.glide:okhttp3-integration:4.6.1",
             //json解析

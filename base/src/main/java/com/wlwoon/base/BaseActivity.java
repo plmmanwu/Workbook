@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,13 +15,20 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.wlwoon.base.common.BitmapUtil;
+import com.wlwoon.base.common.Permissions;
+import com.wlwoon.base.common.PermissonsHelp;
 import com.wlwoon.base.common.StatusBarUtils;
 import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
 
+import java.util.List;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -37,9 +45,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     private ActivityForResultCallback callback;
     private int code;//requestCode
 
+    protected String TAG = null;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TAG = getClass().getSimpleName();
         mActivity = this;
         setContentView(getLayoutId());
         mBind = ButterKnife.bind(this);
@@ -154,6 +166,24 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    protected void startActivityWithDataAndPermission(Context context, Class<?> cls, Bundle bundle, List<Permissions> permissions) {
+        if (permissions != null&&permissions.size()>0) {
+            for (Permissions permission : permissions) {
+                String toPermission = PermissonsHelp.toPermission(permission);
+                if (ContextCompat.checkSelfPermission(mContext, toPermission)!= PackageManager.PERMISSION_GRANTED) {
+                    String[] toPermissionArray = PermissonsHelp.toPermissionArray(permission);
+                    ActivityCompat.requestPermissions(this,toPermissionArray,101);
+                }
+            }
+        }
+
+        Intent intent = new Intent(context, cls);
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
+        startActivity(intent);
+    }
+
     protected void startActivityForResultWithData(Context context, Class<?> cls, Bundle bundle, int code, ActivityForResultCallback callback) {
         Utils.checkNotNull(callback);
         this.callback = callback;
@@ -177,6 +207,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    }
+
     protected void finishActivity() {
         finishActivityWithData(null);
     }
@@ -190,5 +226,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         finish();
     }
+
+
 
 }

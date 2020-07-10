@@ -272,16 +272,16 @@ public class ImageLoaderOptions {
             this.mImageSize=new ImageSize(width,height);
             return this;
         }
-        public Builder asGif(boolean asGif){
-            this.asGif=asGif;
+        public Builder asGif(){
+            this.asGif=true;
             return this;
         }
-        public Builder dontAnimate(boolean dontAnimate){
-            this.dontAnimate=dontAnimate;
+        public Builder dontAnimate(){
+            this.dontAnimate=true;
             return this;
         }
-        public Builder asBitmap(boolean asBitmap){
-            this.asBitmap=asBitmap;
+        public Builder asBitmap(){
+            this.asBitmap=true;
             return this;
         }
 

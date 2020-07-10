@@ -40,5 +40,8 @@ dependencies {
     api depend["butterknife"]
     annotationProcessor depend["butterknife-compiler"]
     implementation depend["gson"]
+    implementation depend["rxjava"]
+    implementation depend["rxandroid"]
+    implementation depend["okhttp"]
 
 }

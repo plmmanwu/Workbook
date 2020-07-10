@@ -2,9 +2,7 @@ package com.wlwoon.workbook;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,14 +12,12 @@ import com.wlwoon.base.BaseActivity;
 import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
 import com.wlwoon.contactspicker.Contact;
-import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
 import com.wlwoon.imageloader.ImageLoaderOptions;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 public class MainActivity extends BaseActivity implements ActivityForResultCallback {
@@ -50,40 +46,46 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mBtnJump = findViewById(R.id.btn_jump);
         mButton = findViewById(R.id.btn_bg);
         View view = findViewById(R.id.view);
-        String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1594319112777&di=f740a2e8429892d288b97f027b8935cf&imgtype=0&src=http%3A%2F%2Fa2.att.hudong.com%2F71%2F56%2F16300000988660128426569668958.jpg";
+        String url2 = "http://dingyue.ws.126.net/aV3dMfrhDdj5YbuRtTZ19sYLyRUlMv2kSkuoC2JFjpHob1543285491837compressflag.jpg";
+        String gif = "http://upfile.asqql.com/2009pasdfasdfic2009s305985-ts/2019-6/201961118291584771.gif";
         ImageLoaderManager
                 .getInstance()
                 .showImage(
                         new ImageLoaderOptions
-                                .Builder(mIv,url)
+                                .Builder(mIv,gif)
+                                .asGif()
                                 .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                RxjavaDemo.getInstance().demoConcat();
+
+
 //                Intent intent = new Intent(mContext, ContactsPickActivity.class);
 ////                intent.setComponent(new ComponentName("com.wlwoon.contactspicker", "com.wlwoon.contactspicker.ContactsPickActivity"));
 //                startActivity(intent);
-                Bundle bundle = new Bundle();
-                bundle.putBoolean("isMultipleChoice",true);
-                startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,MainActivity.this);
-                TextView textView = new TextView(mContext);
-                textView.setTextSize(20);
-                textView.setTextColor(getResources().getColor(R.color.colorAccent));
-                textView.setText("嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻");
-                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                textView.setLayoutParams(params);
-                ViewGroup rootView = (ViewGroup) mTvTip.getRootView();
-                int left = mButton.getLeft();
-                int top = mButton.getTop();
-                int right = mButton.getRight();
-                int bottom = mButton.getBottom();
-                int height = textView.getHeight();
-                int width = textView.getWidth();
-                textView.layout(left, bottom, left + 50, bottom + 50);
-                rootView.addView(textView, params);
-
-                Log.i("wu.xy", "he:" + height + "width=" + width);
+//                Bundle bundle = new Bundle();
+//                bundle.putBoolean("isMultipleChoice",true);
+//                startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,MainActivity.this);
+//                TextView textView = new TextView(mContext);
+//                textView.setTextSize(20);
+//                textView.setTextColor(getResources().getColor(R.color.colorAccent));
+//                textView.setText("嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻嘻");
+//                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//                textView.setLayoutParams(params);
+//                ViewGroup rootView = (ViewGroup) mTvTip.getRootView();
+//                int left = mButton.getLeft();
+//                int top = mButton.getTop();
+//                int right = mButton.getRight();
+//                int bottom = mButton.getBottom();
+//                int height = textView.getHeight();
+//                int width = textView.getWidth();
+//                textView.layout(left, bottom, left + 50, bottom + 50);
+//                rootView.addView(textView, params);
+//
+//                Log.i("wu.xy", "he:" + height + "width=" + width);
 
 
 //                change = !change;
@@ -117,10 +119,5 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // TODO: add setContentView(...) invocation
-        ButterKnife.bind(this);
-    }
+
 }
