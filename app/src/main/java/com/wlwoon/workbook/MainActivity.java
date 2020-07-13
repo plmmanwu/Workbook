@@ -9,18 +9,20 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.wlwoon.base.BaseActivity;
+import com.wlwoon.base.common.Permissions;
 import com.wlwoon.base.common.ToastUtil;
+import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
+import com.wlwoon.base.interfaces.RequestPermissionCallback;
 import com.wlwoon.contactspicker.Contact;
-import com.wlwoon.imageloader.ImageLoaderManager;
-import com.wlwoon.imageloader.ImageLoaderOptions;
+import com.wlwoon.contactspicker.ContactsPickActivity;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 
 
-public class MainActivity extends BaseActivity implements ActivityForResultCallback {
+public class MainActivity extends BaseActivity implements ActivityForResultCallback, RequestPermissionCallback {
 
 
     @BindView(R.id.tv_tip)
@@ -48,27 +50,27 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         View view = findViewById(R.id.view);
         String url2 = "http://dingyue.ws.126.net/aV3dMfrhDdj5YbuRtTZ19sYLyRUlMv2kSkuoC2JFjpHob1543285491837compressflag.jpg";
         String gif = "http://upfile.asqql.com/2009pasdfasdfic2009s305985-ts/2019-6/201961118291584771.gif";
-        ImageLoaderManager
-                .getInstance()
-                .showImage(
-                        new ImageLoaderOptions
-                                .Builder(mIv,gif)
-                                .asGif()
-                                .build());
+//        ImageLoaderManager
+//                .getInstance()
+//                .showImage(
+//                        new ImageLoaderOptions
+//                                .Builder(mIv,gif)
+//                                .asGif()
+//                                .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                RxjavaDemo.getInstance().demoConcat();
+//                RxjavaDemo.getInstance().demoConcat();
 
 
 //                Intent intent = new Intent(mContext, ContactsPickActivity.class);
-////                intent.setComponent(new ComponentName("com.wlwoon.contactspicker", "com.wlwoon.contactspicker.ContactsPickActivity"));
+//                intent.setComponent(new ComponentName("com.wlwoon.contactspicker", "com.wlwoon.contactspicker.ContactsPickActivity"));
 //                startActivity(intent);
-//                Bundle bundle = new Bundle();
-//                bundle.putBoolean("isMultipleChoice",true);
-//                startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,MainActivity.this);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isMultipleChoice",true);
+                startActivityWithDataAndPermission(mContext, ContactsPickActivity.class,bundle, Utils.genLists(Permissions.CONTACTS,Permissions.STORAGE),MainActivity.this);
 //                TextView textView = new TextView(mContext);
 //                textView.setTextSize(20);
 //                textView.setTextColor(getResources().getColor(R.color.colorAccent));
@@ -120,4 +122,13 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
     }
 
 
+    @Override
+    public void passed() {
+        ToastUtil.getInstance().showLong("tonguo");
+    }
+
+    @Override
+    public void denied() {
+        ToastUtil.getInstance().showLong("拒绝");
+    }
 }

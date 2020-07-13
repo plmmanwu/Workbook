@@ -6,14 +6,23 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -249,44 +258,204 @@ public class RxjavaDemo {
      * 例如用户注册成功后需要自动登录，我们只需要先通过注册接口注册用户信息，注册成功后马上调用登录接口进行自动登录即可
      */
     public void demoFlatMap() {
-//        Observable.create(new ObservableOnSubscribe<DemoData>() {
-//            @SuppressLint("CheckResult")
-//            @Override
-//            public void subscribe(ObservableEmitter<DemoData> emitter) throws Exception {
-//                isFromNet = true;
-//                OkHttpClient okHttpClient = new OkHttpClient();
-//                Request request = new Request
-//                        .Builder()
-//                        .url("http://gank.io/api/data/Android/10/1")
-//                        .get()
-//                        .build();
-//
-//                Response response = okHttpClient.newCall(request).execute();
-//
-//                if (response != null && response.isSuccessful()) {
-//                    ResponseBody body = response.body();
-//                    Log.e(TAG, "map:转换前:" + body);
-//                    DemoData data = new Gson().fromJson(body.string(), new TypeToken<DemoData>() {
-//                    }.getType());
-//                    emitter.onNext(data);
-//                } else {
-//                    emitter.onError(new Throwable("请求失败"));
-//                }
-//            }
-//        }).subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .doOnNext(new Consumer<DemoData>() {
-//                    @Override
-//                    public void accept(DemoData demoData) throws Exception {
-//
-//                    }
-//                })
-//                .observeOn(Schedulers.io())
-//                .flatMap(new Function<DemoData, ObservableSource<?>>() {
-//                    @Override
-//                    public ObservableSource<?> apply(DemoData demoData) throws Exception {
-//                        return null;
-//                    }
-//                })
+        Observable.create(new ObservableOnSubscribe<DemoData>() {
+            @SuppressLint("CheckResult")
+            @Override
+            public void subscribe(ObservableEmitter<DemoData> emitter) throws Exception {
+                isFromNet = true;
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request
+                        .Builder()
+                        .url("http://gank.io/api/data/Android/10/1")
+                        .get()
+                        .build();
+
+                Response response = okHttpClient.newCall(request).execute();
+
+                if (response != null && response.isSuccessful()) {
+                    ResponseBody body = response.body();
+                    Log.e(TAG, "map:转换前:" + body);
+                    DemoData data = new Gson().fromJson(body.string(), new TypeToken<DemoData>() {
+                    }.getType());
+                    emitter.onNext(data);
+                } else {
+                    emitter.onError(new Throwable("请求失败"));
+                }
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(new Consumer<DemoData>() {
+                    @Override
+                    public void accept(DemoData demoData) throws Exception {
+
+                    }
+                })
+                .observeOn(Schedulers.io())
+                .flatMap(new Function<DemoData, ObservableSource<String>>() {
+                    @Override
+                    public ObservableSource<String> apply(DemoData demoData) throws Exception {
+                        List<DemoData.ResultsBean> results = demoData.getResults();
+                        String id = results.get(0).get_id();
+                        //拿id去模拟网络请求--
+                        return Observable.just(id);
+                    }
+                }).subscribe(new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+
+            }
+        });
     }
+
+    /**
+     * 将多个Observable 对象拼到一起，待全部拿到结果后再去干一番事业
+     */
+    public void demoZip() {
+        Observable<Integer> observable = Observable.just(1, 2, 3);
+        Observable<String> observable1 = Observable.just("a", "b", "c");
+        Observable.zip(observable, observable1, new BiFunction<Integer, String, Map<Integer, String>>() {
+            @Override
+            public Map<Integer, String> apply(Integer integer, String s) throws Exception {
+                Map<Integer, String> map = new HashMap<>();
+                map.put(integer, s);
+                return map;
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Map<Integer, String>>() {
+                    @Override
+                    public void accept(Map<Integer, String> integerStringMap) throws Exception {
+                        Log.e(TAG, "zip : " + new Gson().toJson(integerStringMap));
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+
+                    }
+                });
+
+    }
+
+    /**
+     * interval 定时任务  每隔多久执行一次
+     * 可以通过disposable.dispose() 去终止轮询
+     */
+    public void demoInterval() {
+        int count = 0;
+        Disposable disposable = Flowable.interval(2, TimeUnit.SECONDS)
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        Log.e(TAG, "interval :" + aLong + "\n");
+                    }
+                });
+
+//        disposable.dispose();
+
+    }
+
+    /**
+     * timer
+     * 延时任务
+     */
+    public void demoTimer() {
+        Observable.timer(5, TimeUnit.SECONDS)
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        Log.e(TAG, "Timer :" + aLong + "\n");
+                    }
+                });
+    }
+
+    /**
+     * distinct 去重
+     */
+    public void demoDistinct() {
+        Observable.just(1, 2, 2, 1, 3, 5, 5)
+                .distinct()
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "Distinct :" + integer + "\n");
+                    }
+                });
+    }
+
+    /**
+     * filter
+     * 根据一定的条件去筛选
+     */
+    public void demoFilter() {
+        Observable.just(1, 56, 23, 5, 45)
+                .filter(new Predicate<Integer>() {
+                    @Override
+                    public boolean test(Integer integer) throws Exception {
+                        return integer > 30;
+                    }
+                })
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "Filter :" + integer + "\n");
+                    }
+                });
+    }
+
+    /**
+     * take
+     * 从index=0开始拿两个
+     */
+    public void demoTake() {
+        Observable.just(1, 2, 3, 4, 5)
+                .take(2)
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "Take :" + integer + "\n");
+                    }
+                });
+    }
+
+    /**
+     * skip
+     * 从index=2  往后截取所有onNext成果
+     */
+    public void demoSkip() {
+        Observable.just(1, 2, 3, 4, 5)
+                .skip(2)
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "Skip :" + integer + "\n");
+                    }
+                });
+    }
+
+    /**
+     * buffer
+     * 从index=0  开始拿count个
+     * 再index+2  再拿count个
+     * 知道index超出onNext个数
+     */
+    public void demoBuffer() {
+        Observable.just(1, 2, 3, 4, 5)
+                .buffer(4, 2)
+                .subscribe(new Consumer<List<Integer>>() {
+                    @Override
+                    public void accept(List<Integer> integers) throws Exception {
+                        Log.e(TAG, "Buffer :" + new Gson().toJson(integers) + "\n");
+                    }
+                });
+    }
+
+
+
+
+
+
 }
