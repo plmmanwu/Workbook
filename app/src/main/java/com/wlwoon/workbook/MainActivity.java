@@ -16,6 +16,8 @@ import com.wlwoon.base.interfaces.ActivityForResultCallback;
 import com.wlwoon.base.interfaces.RequestPermissionCallback;
 import com.wlwoon.contactspicker.Contact;
 import com.wlwoon.contactspicker.ContactsPickActivity;
+import com.wlwoon.imageloader.ImageLoaderManager;
+import com.wlwoon.imageloader.ImageLoaderOptions;
 
 import java.util.ArrayList;
 
@@ -50,13 +52,12 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         View view = findViewById(R.id.view);
         String url2 = "http://dingyue.ws.126.net/aV3dMfrhDdj5YbuRtTZ19sYLyRUlMv2kSkuoC2JFjpHob1543285491837compressflag.jpg";
         String gif = "http://upfile.asqql.com/2009pasdfasdfic2009s305985-ts/2019-6/201961118291584771.gif";
-//        ImageLoaderManager
-//                .getInstance()
-//                .showImage(
-//                        new ImageLoaderOptions
-//                                .Builder(mIv,gif)
-//                                .asGif()
-//                                .build());
+        ImageLoaderManager
+                .getInstance()
+                .showImage(
+                        new ImageLoaderOptions
+                                .Builder(mIv,gif)
+                                .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override

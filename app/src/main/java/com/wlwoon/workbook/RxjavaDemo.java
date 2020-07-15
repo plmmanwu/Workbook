@@ -106,6 +106,7 @@ public class RxjavaDemo {
      * <p>
      * 不指定线程的话  由调用者决定在哪个线程
      */
+    @SuppressLint("CheckResult")
     public void demo2() {
         Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
@@ -134,6 +135,7 @@ public class RxjavaDemo {
     /**
      * 操作符  map  （对象转换  gson--bean）
      */
+    @SuppressLint("CheckResult")
     public void demoMap() {
         Observable.create(new ObservableOnSubscribe<Response>() {
             @Override
@@ -189,7 +191,7 @@ public class RxjavaDemo {
      * 适用场景：先读取缓存的数据，如果缓存没有数据，再通过网络请求获取，随后在主线程更新我们的UI。
      */
     boolean isFromNet = false;
-
+    @SuppressLint("CheckResult")
     public void demoConcat() {
         Observable<DemoData> cacheData = Observable.create(new ObservableOnSubscribe<DemoData>() {
             @SuppressLint("CheckResult")
@@ -257,6 +259,7 @@ public class RxjavaDemo {
      * flatMap 实现多个网络请求依次依赖
      * 例如用户注册成功后需要自动登录，我们只需要先通过注册接口注册用户信息，注册成功后马上调用登录接口进行自动登录即可
      */
+    @SuppressLint("CheckResult")
     public void demoFlatMap() {
         Observable.create(new ObservableOnSubscribe<DemoData>() {
             @SuppressLint("CheckResult")
@@ -315,6 +318,7 @@ public class RxjavaDemo {
     /**
      * 将多个Observable 对象拼到一起，待全部拿到结果后再去干一番事业
      */
+    @SuppressLint("CheckResult")
     public void demoZip() {
         Observable<Integer> observable = Observable.just(1, 2, 3);
         Observable<String> observable1 = Observable.just("a", "b", "c");
@@ -362,6 +366,7 @@ public class RxjavaDemo {
      * timer
      * 延时任务
      */
+    @SuppressLint("CheckResult")
     public void demoTimer() {
         Observable.timer(5, TimeUnit.SECONDS)
                 .subscribe(new Consumer<Long>() {
@@ -375,6 +380,7 @@ public class RxjavaDemo {
     /**
      * distinct 去重
      */
+    @SuppressLint("CheckResult")
     public void demoDistinct() {
         Observable.just(1, 2, 2, 1, 3, 5, 5)
                 .distinct()
@@ -390,6 +396,7 @@ public class RxjavaDemo {
      * filter
      * 根据一定的条件去筛选
      */
+    @SuppressLint("CheckResult")
     public void demoFilter() {
         Observable.just(1, 56, 23, 5, 45)
                 .filter(new Predicate<Integer>() {
@@ -410,6 +417,7 @@ public class RxjavaDemo {
      * take
      * 从index=0开始拿两个
      */
+    @SuppressLint("CheckResult")
     public void demoTake() {
         Observable.just(1, 2, 3, 4, 5)
                 .take(2)
@@ -425,6 +433,7 @@ public class RxjavaDemo {
      * skip
      * 从index=2  往后截取所有onNext成果
      */
+    @SuppressLint("CheckResult")
     public void demoSkip() {
         Observable.just(1, 2, 3, 4, 5)
                 .skip(2)
@@ -442,6 +451,7 @@ public class RxjavaDemo {
      * 再index+2  再拿count个
      * 知道index超出onNext个数
      */
+    @SuppressLint("CheckResult")
     public void demoBuffer() {
         Observable.just(1, 2, 3, 4, 5)
                 .buffer(4, 2)

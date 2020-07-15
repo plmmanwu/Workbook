@@ -1,5 +1,6 @@
 package com.wlwoon.base;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -23,6 +26,8 @@ import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
 import com.wlwoon.base.interfaces.RequestPermissionCallback;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -48,6 +53,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected String TAG = null;
     private RequestPermissionCallback permissionCallback;
+    private Intent perIntent;
 
 
     @Override
@@ -61,7 +67,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         StatusBarUtils.setTransparentForWindow(this);//透明状态栏
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//竖屏
         Intent intent = getIntent();
-        initData(savedInstanceState, intent==null?null:intent.getExtras());//初始化数据
+        initData(savedInstanceState, intent == null ? null : intent.getExtras());//初始化数据
         setStatusBarStyle();
         AppManage.getInstance().inStack(this);
     }
@@ -163,23 +169,46 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    protected void startActivityWithDataAndPermission(Context context, Class<?> cls, Bundle bundle, List<Permissions> permissions, RequestPermissionCallback permissionCallback) {
+
+    int perCount = 0;
+    Handler perHandler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            perCount -= msg.what;
+            Log.d(TAG, "申请次数 " + perCount);
+            if (perCount==0) {
+                startActivity(perIntent);
+            }
+        }
+    };
+
+    protected void startActivityWithDataAndPermission(Context context, Class<?> cls, Bundle bundle, List<Permissions> permissions, final RequestPermissionCallback permissionCallback) {
+        perCount = permissions.size();
+        List<String> permisionsArr = new ArrayList<>();
         this.permissionCallback = permissionCallback;
-        if (permissions != null&&permissions.size()>0) {
-            for (Permissions permission : permissions) {
+        perIntent = new Intent(context, cls);
+        if (bundle != null) {
+            perIntent.putExtras(bundle);
+        }
+        if (permissions != null && permissions.size() > 0) {
+            for (int i = 0; i < permissions.size(); i++) {
+                Permissions permission = permissions.get(i);
                 String toPermission = PermissonsHelp.toPermission(permission);
-                if (ContextCompat.checkSelfPermission(mContext, toPermission)!= PackageManager.PERMISSION_GRANTED) {
-                    String[] toPermissionArray = PermissonsHelp.toPermissionArray(permission);
-                    ActivityCompat.requestPermissions(this,toPermissionArray,101);
+                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                    final String[] toPermissionArray = PermissonsHelp.toPermissionArray(permission);
+                    List<String> strings = Arrays.asList(toPermissionArray);
+                    permisionsArr.addAll(strings);
                 }
             }
         }
 
-        Intent intent = new Intent(context, cls);
-        if (bundle != null) {
-            intent.putExtras(bundle);
+        if (permisionsArr.size() == 0) {
+            startActivity(perIntent);
+        } else {
+            String[] strings = new String[permisionsArr.size()];
+            String[] array = permisionsArr.toArray(strings);
+            ActivityCompat.requestPermissions(mActivity, array, 101);
         }
-        startActivity(intent);
     }
 
     protected void startActivityForResultWithData(Context context, Class<?> cls, Bundle bundle, int code, ActivityForResultCallback callback) {
@@ -201,7 +230,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == code) {
-            callback.result(data,requestCode);
+            callback.result(data, requestCode);
         }
     }
 
@@ -209,8 +238,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Message message = Message.obtain(perHandler);
+            message.what = 1;
+            message.sendToTarget();
             permissionCallback.passed();
         } else {
+            Message message = Message.obtain(perHandler);
+            message.what = 0;
+            message.sendToTarget();
             permissionCallback.denied();
         }
     }
@@ -228,7 +263,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         finish();
     }
-
 
 
 }
