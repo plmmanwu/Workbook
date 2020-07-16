@@ -3,5 +3,6 @@ include ':imageloader'
 include ':base'
 include ':composevoice'
 include ':app'
+include ':network'
 include ':contactspicker'
 rootProject.name = "Workbook"

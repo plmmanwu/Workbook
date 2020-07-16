@@ -60,6 +60,7 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
                 .showImage(
                         new ImageLoaderOptions
                                 .Builder(mIv, gif)
+//                                .placeholder()
                                 .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
