@@ -6,7 +6,7 @@ package com.wlwoon.base.interfaces;
  */
 
 public interface RequestPermissionCallback {
-    void passed();
+    void passed(int requestCode);
 
-    void denied();
+    void denied(int requestCode);
 }

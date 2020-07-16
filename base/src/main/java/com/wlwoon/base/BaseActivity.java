@@ -1,40 +1,26 @@
 package com.wlwoon.base;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.wlwoon.base.common.BitmapUtil;
-import com.wlwoon.base.common.Permissions;
-import com.wlwoon.base.common.PermissonsHelp;
 import com.wlwoon.base.common.StatusBarUtils;
 import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
-import com.wlwoon.base.interfaces.RequestPermissionCallback;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -52,8 +38,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private int code;//requestCode
 
     protected String TAG = null;
-    private RequestPermissionCallback permissionCallback;
-    private Intent perIntent;
 
 
     @Override
@@ -170,45 +154,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
 
-    int perCount = 0;
-    Handler perHandler = new Handler() {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            perCount -= msg.what;
-            Log.d(TAG, "申请次数 " + perCount);
-            if (perCount==0) {
-                startActivity(perIntent);
-            }
-        }
-    };
 
-    protected void startActivityWithDataAndPermission(Context context, Class<?> cls, Bundle bundle, List<Permissions> permissions, final RequestPermissionCallback permissionCallback) {
-        perCount = permissions.size();
-        List<String> permisionsArr = new ArrayList<>();
-        this.permissionCallback = permissionCallback;
-        perIntent = new Intent(context, cls);
-        if (bundle != null) {
-            perIntent.putExtras(bundle);
-        }
-        if (permissions != null && permissions.size() > 0) {
-            for (int i = 0; i < permissions.size(); i++) {
-                Permissions permission = permissions.get(i);
-                String toPermission = PermissonsHelp.toPermission(permission);
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                    final String[] toPermissionArray = PermissonsHelp.toPermissionArray(permission);
-                    List<String> strings = Arrays.asList(toPermissionArray);
-                    permisionsArr.addAll(strings);
-                }
-            }
-        }
+    private void showAlertDialog() {
 
-        if (permisionsArr.size() == 0) {
-            startActivity(perIntent);
-        } else {
-            String[] strings = new String[permisionsArr.size()];
-            String[] array = permisionsArr.toArray(strings);
-            ActivityCompat.requestPermissions(mActivity, array, 101);
-        }
+
     }
 
     protected void startActivityForResultWithData(Context context, Class<?> cls, Bundle bundle, int code, ActivityForResultCallback callback) {
@@ -234,22 +183,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Message message = Message.obtain(perHandler);
-            message.what = 1;
-            message.sendToTarget();
-            permissionCallback.passed();
-        } else {
-            Message message = Message.obtain(perHandler);
-            message.what = 0;
-            message.sendToTarget();
-            permissionCallback.denied();
-        }
-    }
-
     protected void finishActivity() {
         finishActivityWithData(null);
     }
@@ -263,6 +196,5 @@ public abstract class BaseActivity extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         finish();
     }
-
 
 }

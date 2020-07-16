@@ -1,6 +1,7 @@
 package com.wlwoon.workbook;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,11 +10,11 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.wlwoon.base.BaseActivity;
+import com.wlwoon.base.common.PermissionCode;
 import com.wlwoon.base.common.Permissions;
 import com.wlwoon.base.common.ToastUtil;
 import com.wlwoon.base.common.Utils;
 import com.wlwoon.base.interfaces.ActivityForResultCallback;
-import com.wlwoon.base.interfaces.RequestPermissionCallback;
 import com.wlwoon.contactspicker.Contact;
 import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
@@ -21,10 +22,12 @@ import com.wlwoon.imageloader.ImageLoaderOptions;
 
 import java.util.ArrayList;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
 
 
-public class MainActivity extends BaseActivity implements ActivityForResultCallback, RequestPermissionCallback {
+public class MainActivity extends BaseActivity implements ActivityForResultCallback {
 
 
     @BindView(R.id.tv_tip)
@@ -56,12 +59,14 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
                 .getInstance()
                 .showImage(
                         new ImageLoaderOptions
-                                .Builder(mIv,gif)
+                                .Builder(mIv, gif)
                                 .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                getContact();
 
 //                RxjavaDemo.getInstance().demoConcat();
 
@@ -69,9 +74,7 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
 //                Intent intent = new Intent(mContext, ContactsPickActivity.class);
 //                intent.setComponent(new ComponentName("com.wlwoon.contactspicker", "com.wlwoon.contactspicker.ContactsPickActivity"));
 //                startActivity(intent);
-                Bundle bundle = new Bundle();
-                bundle.putBoolean("isMultipleChoice",true);
-                startActivityWithDataAndPermission(mContext, ContactsPickActivity.class,bundle, Utils.genLists(Permissions.CONTACTS,Permissions.STORAGE),MainActivity.this);
+
 //                TextView textView = new TextView(mContext);
 //                textView.setTextSize(20);
 //                textView.setTextColor(getResources().getColor(R.color.colorAccent));
@@ -112,6 +115,17 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mTvTip.append("有响应");
     }
 
+    private void getContact() {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isMultipleChoice", true);
+        String[] permission = Utils.checkPermission(Permissions.CONTACTS);
+        if (permission.length == 0) {
+            startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,this);
+        } else {
+            ActivityCompat.requestPermissions(mActivity,permission, PermissionCode.CONTACTS);
+        }
+    }
+
     @Override
     public void result(Intent intent, int code) {
         if (intent != null) {
@@ -122,14 +136,14 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
-
     @Override
-    public void passed() {
-        ToastUtil.getInstance().showLong("tonguo");
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            getContact();
+        } else {
+            ToastUtil.getInstance().showLong("权限被拒绝了===");
+        }
     }
 
-    @Override
-    public void denied() {
-        ToastUtil.getInstance().showLong("拒绝");
-    }
 }
