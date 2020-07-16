@@ -1,3 +1,4 @@
+include ':network'
 include ':imageloader'
 include ':base'
 include ':composevoice'
