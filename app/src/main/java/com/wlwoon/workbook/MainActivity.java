@@ -1,5 +1,6 @@
 package com.wlwoon.workbook;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.base.common.PermissionCode;
 import com.wlwoon.base.common.Permissions;
@@ -19,12 +21,19 @@ import com.wlwoon.contactspicker.Contact;
 import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
 import com.wlwoon.imageloader.ImageLoaderOptions;
+import com.wlwoon.network.RetrofitFactory;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class MainActivity extends BaseActivity implements ActivityForResultCallback {
@@ -67,7 +76,7 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
             @Override
             public void onClick(View v) {
 
-                getContact();
+                getData();
 
 //                RxjavaDemo.getInstance().demoConcat();
 
@@ -145,6 +154,34 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         } else {
             ToastUtil.getInstance().showLong("权限被拒绝了===");
         }
+    }
+
+    @SuppressLint("CheckResult")
+    private void getData() {
+        Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
+        dataObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<DemoData>() {
+                    @Override
+                    public void accept(DemoData demoData) throws Exception {
+                        Logger.json(new Gson().toJson(demoData));
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Logger.i(throwable.getMessage());
+                    }
+                });
+
+
+        Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
+            @Override
+            public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
+
+            }
+        }).observeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
     }
 
 }

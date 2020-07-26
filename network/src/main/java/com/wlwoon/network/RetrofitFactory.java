@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -29,18 +30,20 @@ public class RetrofitFactory {
     public OkHttpClient getOkHttpClient() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(10, TimeUnit.SECONDS);
+        builder.readTimeout(10, TimeUnit.SECONDS);
+        builder.writeTimeout(10, TimeUnit.SECONDS);
         builder.addNetworkInterceptor(new LogIntercept());
         return builder.build();
     }
 
-    public <T> T creat(Class<T> cls) {
+    public <T> T creat(Class<T> cls,String baseUrl) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("")
+                .baseUrl(baseUrl)
                 .client(getOkHttpClient())
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        T t = retrofit.create(cls);
-        return t;
+        return retrofit.create(cls);
     }
 
 }
