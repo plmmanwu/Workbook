@@ -44,5 +44,7 @@ dependencies {
     implementation depend["rxjava"]
     implementation depend["rxandroid"]
     implementation depend["okhttp"]
+    implementation depend["retrofit"]
+    implementation depend["logger"]
 
 }

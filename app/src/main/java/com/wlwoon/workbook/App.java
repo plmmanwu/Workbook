@@ -3,6 +3,8 @@ package com.wlwoon.workbook;
 import android.app.Application;
 
 import com.Tool.Common.CommonApplication;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
 import com.wlwoon.base.Base;
 import com.wlwoon.glide.GlideImageLocader;
 import com.wlwoon.imageloader.ImageLoaderConfig;
@@ -25,6 +27,8 @@ public class App extends Application {
                 .build();
 
         ImageLoaderManager.getInstance().init(this, loaderConfig);
+
+        Logger.addLogAdapter(new AndroidLogAdapter());
     }
 
 

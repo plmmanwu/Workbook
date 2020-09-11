@@ -64,5 +64,6 @@ ext{
             "butterknife"                            : "com.jakewharton:butterknife:10.1.0",
             "butterknife-compiler"                    : "com.jakewharton:butterknife-compiler:10.1.0",
             "gif-drawable"                    : "pl.droidsonroids.gif:android-gif-drawable:1.2.19",
+            "logger"                    : 'com.orhanobut:logger:2.2.0',
     ]
 }

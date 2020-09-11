@@ -1,5 +1,6 @@
 package com.wlwoon.workbook;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.base.common.PermissionCode;
 import com.wlwoon.base.common.Permissions;
@@ -21,6 +23,7 @@ import com.wlwoon.contactspicker.Contact;
 import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
 import com.wlwoon.imageloader.ImageLoaderOptions;
+import com.wlwoon.network.RetrofitFactory;
 
 import java.util.ArrayList;
 
@@ -28,6 +31,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class MainActivity extends BaseActivity implements ActivityForResultCallback {
@@ -63,15 +72,20 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
                 .showImage(
                         new ImageLoaderOptions
                                 .Builder(mIv, gif)
+//                                .placeholder()
                                 .build());
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+<<<<<<< HEAD
                 playRecord();
 
 //                getContact();
+=======
+                getData();
+>>>>>>> 0d0b1a4fb8c74221cbe78456c436911040969d1b
 
 //                RxjavaDemo.getInstance().demoConcat();
 
@@ -161,6 +175,7 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
+<<<<<<< HEAD
     private void playRecord() {
         String[] permission = Utils.checkPermission(Permissions.MICROPHONE);
         if (permission.length == 0) {
@@ -174,6 +189,34 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
     @RequiresApi(api = Build.VERSION_CODES.P)
     private void getExcutor() {
         
+=======
+    @SuppressLint("CheckResult")
+    private void getData() {
+        Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
+        dataObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<DemoData>() {
+                    @Override
+                    public void accept(DemoData demoData) throws Exception {
+                        Logger.json(new Gson().toJson(demoData));
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Logger.i(throwable.getMessage());
+                    }
+                });
+
+
+        Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
+            @Override
+            public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
+
+            }
+        }).observeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
+>>>>>>> 0d0b1a4fb8c74221cbe78456c436911040969d1b
     }
 
 }
