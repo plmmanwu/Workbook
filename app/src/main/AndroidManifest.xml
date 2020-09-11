@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".App"
@@ -18,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
         <activity android:name=".MainActivity2"></activity>
+        <activity android:name=".WidgetActivity"></activity>
         <activity android:name="com.wlwoon.contactspicker.ContactsPickActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>

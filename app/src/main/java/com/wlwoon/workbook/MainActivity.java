@@ -2,6 +2,8 @@ package com.wlwoon.workbook;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +25,7 @@ import com.wlwoon.imageloader.ImageLoaderOptions;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
 
@@ -66,7 +69,9 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
             @Override
             public void onClick(View v) {
 
-                getContact();
+                playRecord();
+
+//                getContact();
 
 //                RxjavaDemo.getInstance().demoConcat();
 
@@ -106,10 +111,11 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mBtnJump.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ToastUtil.getInstance().showLong("text" + ++count);
-                Bundle bundle = new Bundle();
-                bundle.putString("text", "我来自mainactivity");
-                startActivityForResultWithData(mContext, MainActivity2.class, bundle, 100, MainActivity.this);
+//                ToastUtil.getInstance().showLong("text" + ++count);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("text", "我来自mainactivity");
+//                startActivityForResultWithData(mContext, MainActivity2.class, bundle, 100, MainActivity.this);
+                startActivity(mContext,WidgetActivity.class);
             }
         });
         mTvTip.append("有响应");
@@ -120,9 +126,9 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         bundle.putBoolean("isMultipleChoice", true);
         String[] permission = Utils.checkPermission(Permissions.CONTACTS);
         if (permission.length == 0) {
-            startActivityForResultWithData(mContext, ContactsPickActivity.class,bundle,101,this);
+            startActivityForResultWithData(mContext, ContactsPickActivity.class, bundle, 101, this);
         } else {
-            ActivityCompat.requestPermissions(mActivity,permission, PermissionCode.CONTACTS);
+            ActivityCompat.requestPermissions(mActivity, permission, PermissionCode.CONTACTS);
         }
     }
 
@@ -140,10 +146,34 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            getContact();
+
+            switch (requestCode) {
+                case PermissionCode.CONTACTS:
+                    getContact();
+                    break;
+                case PermissionCode.MICROPHONE:
+                    playRecord();
+                    break;
+            }
+
         } else {
             ToastUtil.getInstance().showLong("权限被拒绝了===");
         }
+    }
+
+    private void playRecord() {
+        String[] permission = Utils.checkPermission(Permissions.MICROPHONE);
+        if (permission.length == 0) {
+            MediaPlayer player = MediaPlayer.create(this, R.raw.jihuo);
+            player.start();
+        } else {
+            ActivityCompat.requestPermissions(this, permission, PermissionCode.MICROPHONE);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private void getExcutor() {
+        
     }
 
 }
