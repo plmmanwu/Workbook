@@ -449,7 +449,7 @@ public class RxjavaDemo {
      * buffer
      * 从index=0  开始拿count个
      * 再index+2  再拿count个
-     * 知道index超出onNext个数
+     * 直到index超出onNext个数
      */
     @SuppressLint("CheckResult")
     public void demoBuffer() {

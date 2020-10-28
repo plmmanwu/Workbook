@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +27,6 @@ import com.wlwoon.network.RetrofitFactory;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
 import io.reactivex.Observable;
@@ -79,13 +77,10 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
             @Override
             public void onClick(View v) {
 
-<<<<<<< HEAD
                 playRecord();
 
 //                getContact();
-=======
-                getData();
->>>>>>> 0d0b1a4fb8c74221cbe78456c436911040969d1b
+//                getData();
 
 //                RxjavaDemo.getInstance().demoConcat();
 
@@ -175,7 +170,6 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
-<<<<<<< HEAD
     private void playRecord() {
         String[] permission = Utils.checkPermission(Permissions.MICROPHONE);
         if (permission.length == 0) {
@@ -186,37 +180,36 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
-    private void getExcutor() {
+//    @RequiresApi(api = Build.VERSION_CODES.P)
+//    private void getExcutor() {
+@SuppressLint("CheckResult")
+private void getData(){
+    Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
+    dataObservable
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Consumer<DemoData>() {
+                @Override
+                public void accept(DemoData demoData) throws Exception {
+                    Logger.json(new Gson().toJson(demoData));
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                    Logger.i(throwable.getMessage());
+                }
+            });
+
+
+    Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
+        @Override
+        public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
+
+        }
+    }).observeOn(Schedulers.io())
+            .observeOn(Schedulers.io());
+}
         
-=======
-    @SuppressLint("CheckResult")
-    private void getData() {
-        Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
-        dataObservable
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<DemoData>() {
-                    @Override
-                    public void accept(DemoData demoData) throws Exception {
-                        Logger.json(new Gson().toJson(demoData));
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Logger.i(throwable.getMessage());
-                    }
-                });
 
-
-        Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
-            @Override
-            public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
-
-            }
-        }).observeOn(Schedulers.io())
-                .observeOn(Schedulers.io());
->>>>>>> 0d0b1a4fb8c74221cbe78456c436911040969d1b
-    }
 
 }
