@@ -219,19 +219,26 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
             case R.id.btn_get:
                 qCount = 2;
                 getDatas("sh");
+                mTv.setText("开始更新---");
                 break;
             case R.id.btn_show:
                 String[] strings = Utils.checkPermission(Permissions.STORAGE);
                 if (strings.length > 0) {
                     ActivityCompat.requestPermissions(this, strings, 101);
-                } else
-                    startActivity(mContext, ShareShowActivity.class);
+                } else{
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("index", index);
+                    startActivityWithData(mContext, ShareShowActivity.class,bundle);
+                }
+
                 break;
         }
     }
 
 
     String time = "";
+
+    int index=0;
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -241,36 +248,42 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
                 Date date = new Date(System.currentTimeMillis()-1*24*60*60*1000);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat.format(date);
+                index = 0;
                 break;
             case R.id.rb2:
                 mDao = mShareInfo2Dao;
                 Date date2 = new Date(System.currentTimeMillis()-2*24*60*60*1000);
                 SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat2.format(date2);
+                index = 1;
                 break;
             case R.id.rb5:
                 mDao = mShareInfo5Dao;
                 Date date5 = new Date(System.currentTimeMillis()-5*24*60*60*1000);
                 SimpleDateFormat dateFormat5 = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat5.format(date5);
+                index = 2;
                 break;
             case R.id.rb10:
                 mDao = mShareInfo10Dao;
                 Date date10 = new Date(System.currentTimeMillis()-10*24*60*60*1000);
                 SimpleDateFormat dateFormat10 = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat10.format(date10);
+                index = 3;
                 break;
             case R.id.rb20:
                 mDao = mShareInfo20Dao;
                 Date date20 = new Date(System.currentTimeMillis()-20*24*60*60*1000);
                 SimpleDateFormat dateFormat20 = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat20.format(date20);
+                index = 4;
                 break;
             case R.id.rb30:
                 mDao = mShareInfo30Dao;
                 Date date30 = new Date(System.currentTimeMillis()-30*24*60*60*1000);
                 SimpleDateFormat dateFormat30 = new SimpleDateFormat("yyyy/MM/dd");
                 time = dateFormat30.format(date30);
+                index = 5;
                 break;
 
         }

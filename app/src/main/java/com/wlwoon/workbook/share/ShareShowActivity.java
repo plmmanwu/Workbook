@@ -42,6 +42,28 @@ public class ShareShowActivity extends BaseActivity {
     protected void initData(Bundle savedInstanceState, Bundle extras) {
         DaoSession daoSession = App.getDaoSession();
         mShareInfoDao = daoSession.getShareInfoDao();
+        initDb();
+        int index = extras.getInt("index");
+        switch (index){
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+        }
+
+        initDb();
+
+    }
+
+    private void initDb() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -54,7 +76,6 @@ public class ShareShowActivity extends BaseActivity {
         mRc.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ShareShowAdapter(mShareInfoList);
         mRc.setAdapter(mAdapter);
-
     }
 
     @SuppressLint("CheckResult")
