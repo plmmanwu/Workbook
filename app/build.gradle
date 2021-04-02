@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 29
@@ -30,6 +31,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation "com.google.android.material:material:1.0.0"
     implementation project(path: ':base')
     implementation project(path: ':imageloader')
     implementation project(path: ':contactspicker')
@@ -46,5 +48,11 @@ dependencies {
     implementation depend["okhttp"]
     implementation depend["retrofit"]
     implementation depend["logger"]
+//    implementation depend["chart"]
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'org.greenrobot:greendao:3.3.0' // add library
+    implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'com.evrencoskun.library:tableview:0.8.9.4'
 
 }

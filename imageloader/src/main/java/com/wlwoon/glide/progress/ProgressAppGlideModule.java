@@ -22,7 +22,8 @@ public class ProgressAppGlideModule extends AppGlideModule {
     @Override
     public void registerComponents(Context context, Glide glide, Registry registry) {
 //        super.registerComponents(context, glide, registry);
-        registry.prepend(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(ProgressManager.getInstance().getOkHttpClient()));
+        System.out.printf("wxy %s","registerComponents 切换网络请求模式");
+        registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(ProgressManager.getInstance().getOkHttpClient()));
                 registry.prepend(
                 Registry.BUCKET_GIF,
                 InputStream.class,

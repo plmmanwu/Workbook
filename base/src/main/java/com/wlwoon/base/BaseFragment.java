@@ -45,6 +45,8 @@ public abstract class BaseFragment extends Fragment {
 
     protected abstract int getLayoutId();
 
+//    public Fragment getInstance()
+
 
     @Override
     public void onDestroy() {

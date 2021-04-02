@@ -1,10 +1,18 @@
 package com.wlwoon.workbook;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.ResultReceiver;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,12 +30,19 @@ import com.wlwoon.contactspicker.Contact;
 import com.wlwoon.contactspicker.ContactsPickActivity;
 import com.wlwoon.imageloader.ImageLoaderManager;
 import com.wlwoon.imageloader.ImageLoaderOptions;
+import com.wlwoon.imageloader.OnProgressListener;
 import com.wlwoon.network.RetrofitFactory;
+import com.wlwoon.workbook.hencode.HencodeActivity;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -63,21 +78,25 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         mBtnJump = findViewById(R.id.btn_jump);
         mButton = findViewById(R.id.btn_bg);
         View view = findViewById(R.id.view);
-        String url2 = "http://dingyue.ws.126.net/aV3dMfrhDdj5YbuRtTZ19sYLyRUlMv2kSkuoC2JFjpHob1543285491837compressflag.jpg";
+        String url2 = "https://static.dingtalk.com/media/lALPD4d8rJv-JsPNAY3NA0c_839_397.png_720x720q90g.jpg";
+        String url = "https://static.dingtalk.com/media/lALPDhYBNXeY0XTNBJTNB8A_1984_1172.png_720x720q90g.jpg";
         String gif = "http://upfile.asqql.com/2009pasdfasdfic2009s305985-ts/2019-6/201961118291584771.gif";
-        ImageLoaderManager
-                .getInstance()
-                .showImage(
-                        new ImageLoaderOptions
-                                .Builder(mIv, gif)
-//                                .placeholder()
-                                .build());
+        String url3 = "https://static.dingtalk.com/media/lALPBGY17Ifv6hbNBDjNB4A_1920_1080.png_720x720q90g.jpg";
+        String url4 = "https://static.dingtalk.com/media/lALPBGnDayncPpHNAQHNA5g_920_257.png_720x720q90g.jpg";
+
+        getPermission();
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.printf("年-月-日 HH:MM:SS 格式：%tF %<tT%n", new Date());
+//                loadPic(gif);
 
-                playRecord();
+                Intent intent =  new Intent(Settings.ACTION_SETTINGS);
+
+                startActivity(intent);
+//                wifi();
+//                playRecord();
 
 //                getContact();
 //                getData();
@@ -124,10 +143,47 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
 //                Bundle bundle = new Bundle();
 //                bundle.putString("text", "我来自mainactivity");
 //                startActivityForResultWithData(mContext, MainActivity2.class, bundle, 100, MainActivity.this);
-                startActivity(mContext,WidgetActivity.class);
+                startActivity(mContext, HencodeActivity.class);
             }
         });
         mTvTip.append("有响应");
+    }
+
+    private void getPermission() {
+//        Permission
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED
+
+                || ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_SETTINGS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.WRITE_SETTINGS, Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
+        } else {
+//            initDatas();
+        }
+    }
+
+    private void loadPic(String gif) {
+        ImageLoaderManager
+                .getInstance()
+                .showImage(
+                        new ImageLoaderOptions
+                                .Builder(mIv, gif)
+//                                .isSkipMemoryCache(false)
+//                                .placeholder()
+                                .setOnProgressListener(new OnProgressListener() {
+                                    @Override
+                                    public void onProgress(String imageUrl, long bytesRead, long totalBytes, boolean isDone, Exception exception) {
+                                        if (totalBytes == 0) {
+                                            return;
+                                        }
+                                        if (isDone) {
+                                            ToastUtil.getInstance().showShort("图片加载完成");
+                                        }
+                                        String format = String.format("wxy 加载进度：%.2f %% %n", bytesRead * 100f / totalBytes);
+                                        System.out.println(format);
+                                    }
+                                })
+                                .build());
     }
 
     private void getContact() {
@@ -180,36 +236,136 @@ public class MainActivity extends BaseActivity implements ActivityForResultCallb
         }
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.P)
+    //    @RequiresApi(api = Build.VERSION_CODES.P)
 //    private void getExcutor() {
-@SuppressLint("CheckResult")
-private void getData(){
-    Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
-    dataObservable
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Consumer<DemoData>() {
-                @Override
-                public void accept(DemoData demoData) throws Exception {
-                    Logger.json(new Gson().toJson(demoData));
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable throwable) throws Exception {
-                    Logger.i(throwable.getMessage());
-                }
-            });
+    @SuppressLint("CheckResult")
+    private void getData() {
+        Observable<DemoData> dataObservable = RetrofitFactory.getInstance().creat(CommonApi.class, Constance.url).getData();
+        dataObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<DemoData>() {
+                    @Override
+                    public void accept(DemoData demoData) throws Exception {
+                        Logger.json(new Gson().toJson(demoData));
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Logger.i(throwable.getMessage());
+                    }
+                });
 
 
-    Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
-        @Override
-        public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
+        Observable<Object> objectObservable = Observable.create(new ObservableOnSubscribe<Object>() {
+            @Override
+            public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
 
+            }
+        }).observeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
+    }
+    WifiManager wifiManager;
+    void wifi() {
+        wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+//        setWifiApEnabledForAndroidO(mContext,true);
+        openHotspot("wxy","88888888");
+    }
+
+    private void setWifiEnable(WifiManager wifiManager) {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApState");
+//            wifiState = ((int) method.invoke(wifiManager));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }).observeOn(Schedulers.io())
-            .observeOn(Schedulers.io());
-}
-        
+    }
+
+    // 创建WiFi热点
+    public void openHotspot(String SSID, String password) {
+        // 关闭WiFi
+//        closeWifi();
+        WifiConfiguration config = new WifiConfiguration();
+        config.SSID = SSID;
+        config.preSharedKey = password;
+        config.hiddenSSID = true;
+        //开放系统认证
+        config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        // 加密方式
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        config.status = WifiConfiguration.Status.ENABLED;
+        try {
+            // 通过反射来打开热点
+            Method method = wifiManager.getClass().getDeclaredMethod("setWifiApEnabled", WifiConfiguration.class, Boolean.TYPE);
+            boolean enable = (Boolean) method.invoke(wifiManager, config, true);
+            if (enable) Log.i(TAG, "热点已开启 SSID:" + SSID + " password:" + password);
+            else Log.e(TAG, "创建热点失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "创建热点失败:" + e.getMessage());
+        }
+    }
+    // 关闭WiFi热点
+    public void closeHotspot() {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
+            method.setAccessible(true);
+            WifiConfiguration config = (WifiConfiguration) method.invoke(wifiManager);
+            Method method2 = wifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+            method2.invoke(wifiManager, config, false);
+        } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void setWifiApEnabledForAndroidO(Context context, boolean isEnable) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        Field iConnMgrField = null;
+        try {
+            iConnMgrField = connManager.getClass().getDeclaredField("mService");
+            iConnMgrField.setAccessible(true);
+            Object iConnMgr = iConnMgrField.get(connManager);
+            Class<?> iConnMgrClass = Class.forName(iConnMgr.getClass().getName());
+
+            if (isEnable) {
+                Method startTethering = iConnMgrClass.getMethod("startTethering", int.class, ResultReceiver.class, boolean.class);
+                startTethering.invoke(iConnMgr, 0, null, true);
+            } else {
+                Method startTethering = iConnMgrClass.getMethod("stopTethering", int.class);
+                startTethering.invoke(iConnMgr, 0);
+            }
+
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //成功
+    private void getWifiState(WifiManager wifiManager) {
+        int wifiState=0;
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApState");
+            wifiState = ((int) method.invoke(wifiManager));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.i("wxy","state "+wifiState);
+    }
 
 
 }

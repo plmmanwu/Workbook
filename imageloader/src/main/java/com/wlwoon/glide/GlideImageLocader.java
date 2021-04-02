@@ -113,6 +113,14 @@ public class GlideImageLocader implements IImageLoaderstrategy {
 
         }
 
+        //添加进度监听
+        onProgressListener = options.getOnProgressListener();
+        if ( onProgressListener != null) {
+            addProgressListener();
+//            ProgressManager.getInstance().addProgressListener(options.getOnProgressListener());
+        } else {
+            ProgressManager.getInstance().addProgressListener(null);
+        }
 
         RequestBuilder builder = getRequestBuilder(options);
         builder.listener(new RequestListener() {
@@ -136,13 +144,7 @@ public class GlideImageLocader implements IImageLoaderstrategy {
                 return false;
             }
         });
-        //添加进度监听
-        if (options.getOnProgressListener() != null) {
-//            addProgressListener();
-            ProgressManager.getInstance().addProgressListener(options.getOnProgressListener());
-        } else {
-            ProgressManager.getInstance().addProgressListener(null);
-        }
+
         builder.apply(requestOptions).into((ImageView) options.getViewContainer());
     }
 
@@ -226,9 +228,11 @@ public class GlideImageLocader implements IImageLoaderstrategy {
     //进度监听
     private void addProgressListener() {
         if (TextUtils.isEmpty(mImageUrlObj) || !mImageUrlObj.startsWith(HTTP)) return;
+        System.out.printf("wxy %s","addProgressListener 添加进度条监听");
         internalProgressListener = new OnProgressListener() {
             @Override
             public void onProgress(String imageUrl, long bytesRead, long totalBytes, boolean isDone, Exception exception) {
+                System.out.printf("wxy %s","addProgressListener 收到进度回调");
                 if (totalBytes == 0 || !TextUtils.equals(imageUrl, mImageUrlObj)) return;
                 if (mLastBytesRead == bytesRead && mLastStatus == isDone) return;
 

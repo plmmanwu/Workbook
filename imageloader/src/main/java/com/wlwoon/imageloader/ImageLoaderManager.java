@@ -97,9 +97,6 @@ public class ImageLoaderManager {
             }
         }
 
-
-//        loaderstrategy=new GlideImageLocader();
-//        loaderstrategy.init(context);
     }
     private IImageLoaderstrategy getLoaderstrategy(LoaderEnum loaderEnum){
         return imageloaderMap.get(loaderEnum);

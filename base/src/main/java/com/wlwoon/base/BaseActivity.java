@@ -37,7 +37,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private ActivityForResultCallback callback;
     private int code;//requestCode
 
-    protected String TAG = null;
+    protected String TAG = "wxy";
 
 
     @Override

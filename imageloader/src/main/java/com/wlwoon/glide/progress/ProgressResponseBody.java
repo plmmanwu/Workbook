@@ -1,6 +1,8 @@
 package com.wlwoon.glide.progress;
 
 
+import android.util.Log;
+
 import com.wlwoon.imageloader.OnProgressListener;
 
 import java.io.IOException;
@@ -53,11 +55,9 @@ public class ProgressResponseBody extends ResponseBody {
             public long read(@NonNull Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 totalBytesRead += (bytesRead == -1) ? 0 : bytesRead;
-//                Log.d("ProgressListener_PRB==", "bytesRead:" + bytesRead + ",totalBytesRead:" + totalBytesRead);
+                Log.d("wxy _PRB==", "bytesRead:" + bytesRead + ",totalBytesRead:" + totalBytesRead);
                 if (progressListener != null) {
                     progressListener.onProgress(imageUrl, totalBytesRead, contentLength(), (bytesRead == -1), null);
-                } else {
-//                    Log.d("ProgressListener==null=", "ture");
                 }
                 return bytesRead;
             }

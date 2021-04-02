@@ -41,4 +41,5 @@ public class Constant {
     public static final String LyricSuffix = ".lrc";
     public static final String RecordSuffix = ".mp3";
     public static final String PcmSuffix = ".pcm";
+    public static final String DB_NAME = "wk.db";
 }

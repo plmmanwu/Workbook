@@ -31,7 +31,7 @@ public class ProgressManager {
     private OnProgressListener LISTENER = new OnProgressListener() {
         @Override
         public void onProgress(String imageUrl, long bytesRead, long totalBytes, boolean isDone, Exception exception) {
-//            Log.d("ProgressListener_PM===", "bytesRead:" + bytesRead + ",totalBytesRead:" + totalBytes);
+            Log.d("wxy  r_PM===", "bytesRead:" + bytesRead + ",totalBytesRead:" + totalBytes);
             if (mOnProgressListener != null) {
                 mOnProgressListener.onProgress(imageUrl, bytesRead, totalBytes, isDone, exception);
             }
@@ -52,7 +52,7 @@ public class ProgressManager {
                         public Response intercept(@NonNull Chain chain) throws IOException {
                             Request request = chain.request();
                             Response response = chain.proceed(request);
-                            Log.d("OkHttpClient===", "url:" + request.url().toString());
+                            Log.d("wxy OkHttpClient===", "url:" + request.url().toString());
                             return response.newBuilder()
                                     .body(new ProgressResponseBody(request.url().toString(), response.body(), LISTENER))
                                     .build();
