@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.Tool.Common.CommonApplication;
 import com.Tool.Global.Constant;
+import com.facebook.stetho.Stetho;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.wlwoon.base.Base;
@@ -41,6 +42,7 @@ public class App extends Application {
         Logger.addLogAdapter(new AndroidLogAdapter());
 
         initGreenDaoDb();
+        Stetho.initializeWithDefaults(this);
     }
 
     static void initGreenDaoDb() {

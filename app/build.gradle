@@ -54,5 +54,6 @@ dependencies {
     implementation 'org.greenrobot:greendao:3.3.0' // add library
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.evrencoskun.library:tableview:0.8.9.4'
+    implementation 'com.facebook.stetho:stetho:1.6.0'
 
 }

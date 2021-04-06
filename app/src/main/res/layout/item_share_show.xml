@@ -4,7 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:layout_marginBottom="5dp"
-    android:weightSum="4"
     android:background="@color/colorfont"
     >
 
@@ -13,6 +12,8 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:padding="1dp"
+        android:orientation="horizontal"
+        android:weightSum="4"
         >
         <TextView
             android:layout_weight="1"
