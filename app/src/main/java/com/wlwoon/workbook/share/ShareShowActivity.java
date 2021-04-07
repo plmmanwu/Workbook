@@ -4,24 +4,22 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.CalendarView;
 
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.workbook.App;
 import com.wlwoon.workbook.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 public class ShareShowActivity extends BaseActivity {
 
@@ -29,22 +27,31 @@ public class ShareShowActivity extends BaseActivity {
     RecyclerView mRc;
     @BindView(R.id.btn_show)
     Button mBtnShow;
+    @BindView(R.id.cav)
+    CalendarView mCav;
     private ShareShowAdapter mAdapter;
-    private ShareInfoDao mShareInfoDao;
-    List<ShareInfo> mShareInfoList;
+    private ShareInfosDao mShareInfoDao;
+    List<ShareInfos> mShareInfoList;
+
+    List<ShareInfo> mInfoList;
 
     @Override
     protected int getLayoutId() {
         return R.layout.activity_share_show;
     }
 
+    String time = "";
+
     @Override
     protected void initData(Bundle savedInstanceState, Bundle extras) {
         DaoSession daoSession = App.getDaoSession();
-        mShareInfoDao = daoSession.getShareInfoDao();
+        mShareInfoDao = daoSession.getShareInfosDao();
         initDb();
         int index = extras.getInt("index");
-        switch (index){
+        Date date = new Date(System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        time = dateFormat.format(date);
+        switch (index) {
             case 0:
                 break;
             case 1:
@@ -61,43 +68,68 @@ public class ShareShowActivity extends BaseActivity {
 
         initDb();
 
+        mCav.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@androidx.annotation.NonNull CalendarView view, int year, int month, int dayOfMonth) {
+//                long date1 = view.getDate();
+//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+//                time = dateFormat.format(date1);
+                month += 1;
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(year);
+                stringBuilder.append("/");
+                if (String.valueOf(month).length()==1) {
+                    stringBuilder.append("0");
+                }
+                stringBuilder.append(month);
+                stringBuilder.append("/");
+                if (String.valueOf(dayOfMonth).length()==1) {
+                    stringBuilder.append("0");
+                }
+                stringBuilder.append(dayOfMonth);
+                time = stringBuilder.toString();
+                Log.d("wxy ==qureyDatas ==", time);
+                qureyDatas();
+            }
+        });
+
     }
 
-    private void initDb() {
+    void qureyDatas() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mShareInfoList = mShareInfoDao.queryBuilder().orderDesc(ShareInfoDao.Properties.SharePercent).build().list();
-                mBtnShow.setText(mShareInfoList.size()+"");
+                mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfosDao.Properties.Date.eq(time)).build().list();
+//                mShareInfoList = mShareInfoDao.queryBuilder().orderDesc(ShareInfoDao.Properties.SharePercent).build().list();
+                mBtnShow.setText(mShareInfoList.size() + "");
                 Log.d("wxy ==", mShareInfoList.size() + "");
             }
         }).start();
+    }
+
+    private void initDb() {
+        qureyDatas();
 //        mRc.setLayoutManager(new GridLayoutManager(this,4));
+
         mRc.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new ShareShowAdapter(mShareInfoList);
+        mAdapter = new ShareShowAdapter(mInfoList);
         mRc.setAdapter(mAdapter);
     }
 
     @SuppressLint("CheckResult")
     @OnClick(R.id.btn_show)
     public void onClick() {
-        mAdapter.addDatas(mShareInfoList);
-        Observable.create(new ObservableOnSubscribe<Object>() {
+        if (mShareInfoList==null||mShareInfoList.size()==0) {
+            return;
+        }
+        mInfoList=mShareInfoList.get(0).getInfo();
+        mBtnShow.setText(mInfoList.size()+"");
+        Collections.sort(mInfoList, new Comparator<ShareInfo>() {
             @Override
-            public void subscribe(@NonNull ObservableEmitter<Object> emitter) throws Exception {
-
-                emitter.onNext("xxxxxxxxxx");
+            public int compare(ShareInfo o1, ShareInfo o2) {
+                return ((int) ((o2.getSharePercent() - o1.getSharePercent()) * 100));
             }
-        }).observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Object>() {
-                    @Override
-                    public void accept(Object o) throws Exception {
-
-                        Log.d("wxy ==",o.toString());
-                        mBtnShow.setText(o.toString());
-
-                    }
-                });
+        });
+        mAdapter.addDatas(mInfoList);
     }
 }

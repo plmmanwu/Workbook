@@ -12,6 +12,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <CalendarView
+            android:id="@+id/cv"
+            android:layout_width="match_parent"
+            android:layout_height="350dp" />
+
         <EditText
             android:id="@+id/edt_data"
             android:layout_marginTop="50dp"
@@ -34,26 +39,26 @@
 
             <RadioButton
                 android:id="@+id/rb2"
-                android:text="2日"
+                android:text="30日"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <RadioButton
                 android:id="@+id/rb5"
-                android:text="5日"
+                android:text="60日"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <RadioButton
-                android:text="10日"
+                android:text="90日"
                 android:id="@+id/rb10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <RadioButton
-                android:text="20日"
+                android:text="180日"
                 android:id="@+id/rb20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <RadioButton
-                android:text="30日"
+                android:text="365日"
                 android:id="@+id/rb30"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

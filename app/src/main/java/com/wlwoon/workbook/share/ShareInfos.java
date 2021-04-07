@@ -3,8 +3,7 @@ package com.wlwoon.workbook.share;
 import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Unique;
+import org.greenrobot.greendao.annotation.Index;
 
 import java.util.List;
 
@@ -15,26 +14,19 @@ import java.util.List;
 @Entity(nameInDb = "ShareInfos_DB")
 public class ShareInfos extends BaseInfo{
 
-    @Id(autoincrement = true)
-    Long id;
-    @Unique
-    String date;
+//    @Id(autoincrement = true)
+//    Long id;
+    @Index(unique = true)
+    String date;//2021/04/01
     @Convert(columnType = String.class,converter = Level_Converter.class)
     List<ShareInfo> info;
-    @Generated(hash = 308911630)
-    public ShareInfos(Long id, String date, List<ShareInfo> info) {
-        this.id = id;
+    @Generated(hash = 1901246476)
+    public ShareInfos(String date, List<ShareInfo> info) {
         this.date = date;
         this.info = info;
     }
     @Generated(hash = 571343457)
     public ShareInfos() {
-    }
-    public Long getId() {
-        return this.id;
-    }
-    public void setId(Long id) {
-        this.id = id;
     }
     public String getDate() {
         return this.date;
@@ -52,8 +44,7 @@ public class ShareInfos extends BaseInfo{
     @Override
     public String toString() {
         return "ShareInfos{" +
-                "id=" + id +
-                ", date='" + date + '\'' +
+                "date='" + date + '\'' +
                 ", info=" + info +
                 '}';
     }

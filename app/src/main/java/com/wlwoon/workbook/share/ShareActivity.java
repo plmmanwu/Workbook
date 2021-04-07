@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.orhanobut.logger.Logger;
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.base.common.Permissions;
 import com.wlwoon.base.common.Utils;
@@ -19,7 +19,6 @@ import com.wlwoon.workbook.CommonApi;
 import com.wlwoon.workbook.Constance;
 import com.wlwoon.workbook.R;
 
-import org.greenrobot.greendao.AbstractDao;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,6 +37,9 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -57,16 +59,11 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
     Button mBtnShow;
     @BindView(R.id.rg)
     RadioGroup mRg;
+    @BindView(R.id.cv)
+    CalendarView mCv;
 
-
-    private ShareInfoDao mShareInfoDao;
-    private ShareInfo2Dao mShareInfo2Dao;
-    private ShareInfo5Dao mShareInfo5Dao;
-    private ShareInfo10Dao mShareInfo10Dao;
-    private ShareInfo20Dao mShareInfo20Dao;
-    private ShareInfo30Dao mShareInfo30Dao;
-
-    AbstractDao mDao;
+    private ShareInfosDao mShareInfosDao;
+    private Disposable mDisposable;
 
     @Override
     protected int getLayoutId() {
@@ -77,10 +74,36 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
     protected void initData(Bundle savedInstanceState, Bundle extras) {
 
         mRg.setOnCheckedChangeListener(this);
-        Date date = new Date(System.currentTimeMillis()-1*24*60*60*1000);
+        Date date = new Date(System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         time = dateFormat.format(date);
         initDB();
+        initCv();
+
+    }
+
+    private void initCv() {
+
+        mCv.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@androidx.annotation.NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                month += 1;
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(year);
+                stringBuilder.append("/");
+                if (String.valueOf(month).length()==1) {
+                    stringBuilder.append("0");
+                }
+                stringBuilder.append(month);
+                stringBuilder.append("/");
+                if (String.valueOf(dayOfMonth).length()==1) {
+                    stringBuilder.append("0");
+                }
+                stringBuilder.append(dayOfMonth);
+                time = stringBuilder.toString();
+                Log.d("wxy ==qureyDatas ==", time);
+            }
+        });
 
     }
 
@@ -93,7 +116,6 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
 //        }
 //    }
 
-    int qCount = 2;
 
     /**
      * 创业板：创业板的代码是300打头的股票代码。
@@ -129,45 +151,111 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
      */
 
 
+
+
+    int days = 0;
+
     Map<String, String> mMap = new HashMap<>();
-
     @SuppressLint("CheckResult")
-    private void getDatas(String t) {
-
+    private void getDatas() {
         RequestBody requestBody = getRequestBody();
-        Observable<String> dataObservable = RetrofitFactory.getInstance().creat2(CommonApi.class, Constance.shareUrl).getShareData(t, requestBody);
-        dataObservable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String s) throws Exception {
-                        Log.d("wxy ==", s);
-                        Document document = Jsoup.parse(s);
-                        parseData(document);
+        Observable<String> dataObservable_sh = RetrofitFactory.getInstance().creat2(CommonApi.class, Constance.shareUrl).getShareData("sh", requestBody);
+        Observable<String> dataObservable_sz = RetrofitFactory.getInstance().creat2(CommonApi.class, Constance.shareUrl).getShareData("sz", requestBody);
 
-                    }
-                }, new Consumer<Throwable>() {
+        mDisposable = Observable.zip(dataObservable_sh, dataObservable_sz, new BiFunction<String, String, List<ShareInfo>>() {
+            @NonNull
+            @Override
+            public List<ShareInfo> apply(@NonNull String s, @NonNull String s2) throws Exception {
+                Log.d("wxy ==", s);
+                Document document = Jsoup.parse(s);
+                List<ShareInfo> map = parseHtml(document, "sh");
+                Document document1 = Jsoup.parse(s2);
+                List<ShareInfo> map2 = parseHtml(document1, "sz");
+                map.addAll(map2);
+
+                return map;
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<ShareInfo>>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Logger.d("wxy ==", throwable.getMessage());
+                    public void accept(List<ShareInfo> map) throws Exception {
+
+                        List<ShareInfos> infos = mShareInfosDao.queryBuilder().where(ShareInfosDao.Properties.Date.eq(holdDate)).build().list();
+                        if (infos!=null&&infos.size()>0){
+                            if (days > 1) {
+                                Date date = new Date(System.currentTimeMillis() - days * 24 * 60 * 60 * 1000l);
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                                time = dateFormat.format(date);
+                                getDatas();
+                                days--;
+                            }
+                            return ;
+                        }
+
+                        ShareInfos shareInfos = new ShareInfos();
+                        shareInfos.setDate(holdDate);
+                        shareInfos.setInfo(map);
+                        mShareInfosDao.insertOrReplace(shareInfos);
+                        mTv.setText(holdDate + "==更新完毕"+days);
+                        if (days > 1) {
+                            Date date = new Date(System.currentTimeMillis() - days * 24 * 60 * 60 * 1000l);
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                            time = dateFormat.format(date);
+                            getDatas();
+                            days--;
+                        }
+
                     }
                 });
     }
 
-    private void parseData(Document document) {
-        if (mDao instanceof ShareInfoDao) {
-            parseHtml(document,mShareInfoDao);
-        } else if (mDao instanceof ShareInfo2Dao) {
-            parseHtml2(document,mShareInfo2Dao);
-        } else if (mDao instanceof ShareInfo5Dao) {
-            parseHtml5(document,mShareInfo5Dao);
-        } else if (mDao instanceof ShareInfo10Dao) {
-            parseHtml10(document,mShareInfo10Dao);
-        } else if (mDao instanceof ShareInfo20Dao) {
-            parseHtml20(document,mShareInfo20Dao);
-        } else if (mDao instanceof ShareInfo30Dao) {
-            parseHtml30(document,mShareInfo30Dao);
+
+    String holdDate;
+
+    private List<ShareInfo> parseHtml(Document document, String plate) {
+        String hold = document.select("div[id=pnlResult] > h2 > span").text();//持有日期 持股日期: 2021/04/01
+        String[] s = hold.split(" ");
+        holdDate = s[1];
+
+
+        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
+        List<ShareInfo> list = new ArrayList<>();
+        ShareInfo data;
+        int count = 0;
+        for (Element element : elements) {
+            data = new ShareInfo();
+            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
+            if (text1.startsWith("30")) {
+                text1 = text1.replaceFirst("30", "688");
+                continue;
+            } else if (text1.startsWith("9")) {
+                text1 = text1.replaceFirst("9", "60");
+            } else if (text1.startsWith("77")) {
+                text1 = text1.replaceFirst("77", "300");
+                continue;
+            } else if (text1.startsWith("7")) {
+                text1 = text1.replaceFirst("7", "00");
+            } else {
+                continue;
+            }
+            data.setShareId(text1);//code
+            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//
+            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
+            String replace1 = text2.replace(",", "");
+            long l = Long.parseLong(replace1);
+            data.setShareNum(l);//
+            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
+            String replace = text.replace("%", "");
+            double v = Double.parseDouble(replace);
+            data.setSharePercent(v);//
+            list.add(data);
+            if (count == 0) {
+                Log.d("wxy " + count++, data.toString());
+            }
         }
+        Log.d("wxy===",plate + "==" + holdDate + "==更新完毕");
+        return list;
     }
 
     public RequestBody getRequestBody() {
@@ -204,12 +292,7 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
 
     private void initDB() {
         DaoSession daoSession = App.getDaoSession();
-        mShareInfoDao = daoSession.getShareInfoDao();
-        mShareInfo2Dao = daoSession.getShareInfo2Dao();
-        mShareInfo5Dao = daoSession.getShareInfo5Dao();
-        mShareInfo10Dao = daoSession.getShareInfo10Dao();
-        mShareInfo20Dao = daoSession.getShareInfo20Dao();
-        mShareInfo30Dao = daoSession.getShareInfo30Dao();
+        mShareInfosDao = daoSession.getShareInfosDao();
 
     }
 
@@ -217,18 +300,17 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_get:
-                qCount = 2;
-                getDatas("sh");
+                getDatas();
                 mTv.setText("开始更新---");
                 break;
             case R.id.btn_show:
                 String[] strings = Utils.checkPermission(Permissions.STORAGE);
                 if (strings.length > 0) {
                     ActivityCompat.requestPermissions(this, strings, 101);
-                } else{
+                } else {
                     Bundle bundle = new Bundle();
                     bundle.putInt("index", index);
-                    startActivityWithData(mContext, ShareShowActivity.class,bundle);
+                    startActivityWithData(mContext, ShareShowActivity.class, bundle);
                 }
 
                 break;
@@ -238,58 +320,67 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
 
     String time = "";
 
-    int index=0;
+    int index = 0;
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
-        switch (checkedId){
+        switch (checkedId) {
             case R.id.rb:
-                mDao = mShareInfoDao;
-                Date date = new Date(System.currentTimeMillis()-1*24*60*60*1000);
+                Date date = new Date(System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat.format(date);
+//                time = dateFormat.format(date);
                 index = 0;
+                days=1;
                 break;
             case R.id.rb2:
-                mDao = mShareInfo2Dao;
-                Date date2 = new Date(System.currentTimeMillis()-2*24*60*60*1000);
+                Date date2 = new Date(System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000);
                 SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat2.format(date2);
+//                time = dateFormat2.format(date2);
                 index = 1;
+                days=30;
                 break;
             case R.id.rb5:
-                mDao = mShareInfo5Dao;
-                Date date5 = new Date(System.currentTimeMillis()-5*24*60*60*1000);
+                Date date5 = new Date(System.currentTimeMillis() - 5 * 24 * 60 * 60 * 1000);
                 SimpleDateFormat dateFormat5 = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat5.format(date5);
+//                time = dateFormat5.format(date5);
                 index = 2;
+                days=60;
                 break;
             case R.id.rb10:
-                mDao = mShareInfo10Dao;
-                Date date10 = new Date(System.currentTimeMillis()-10*24*60*60*1000);
+                Date date10 = new Date(System.currentTimeMillis() - 10 * 24 * 60 * 60 * 1000);
                 SimpleDateFormat dateFormat10 = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat10.format(date10);
+//                time = dateFormat10.format(date10);
                 index = 3;
+                days=90;
                 break;
             case R.id.rb20:
-                mDao = mShareInfo20Dao;
-                Date date20 = new Date(System.currentTimeMillis()-20*24*60*60*1000);
+                Date date20 = new Date(System.currentTimeMillis() - 20 * 24 * 60 * 60 * 1000);
                 SimpleDateFormat dateFormat20 = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat20.format(date20);
+//                time = dateFormat20.format(date20);
                 index = 4;
+                days=180;
                 break;
             case R.id.rb30:
-                mDao = mShareInfo30Dao;
-                Date date30 = new Date(System.currentTimeMillis()-30*24*60*60*1000);
+                Date date30 = new Date(System.currentTimeMillis() - 30 * 24 * 60 * 60 * 1000l);
                 SimpleDateFormat dateFormat30 = new SimpleDateFormat("yyyy/MM/dd");
-                time = dateFormat30.format(date30);
+//                time = dateFormat30.format(date30);
+//                Log.d("")
                 index = 5;
+                days=365;
                 break;
 
         }
     }
 
-    void parseHtml(Document document,ShareInfoDao dao) {
+    void parseHtml(Document document, ShareInfoDao dao) {
+
+        String hold = document.select("div[id=pnlResult] > h2 > span").text();//持有日期 持股日期: 2021/04/01
+        String[] s = hold.split(" ");
+        String holdDate = s[1];
+        ShareInfos shareInfos = new ShareInfos();
+        shareInfos.date = holdDate;
+
+
         Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
         List<ShareInfo> list = new ArrayList<>();
         ShareInfo data;
@@ -326,230 +417,8 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
                 Log.d("wxy " + count++, data.toString());
             }
         }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
         mTv.setText("更新完毕");
     }
 
-    void parseHtml2(Document document,ShareInfo2Dao dao) {
-        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
-        List<ShareInfo2> list = new ArrayList<>();
-        ShareInfo2 data;
-        int count = 0;
-        for (Element element : elements) {
-            data = new ShareInfo2();
-            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
-            if (text1.startsWith("30")) {
-                text1 = text1.replaceFirst("30", "688");
-                continue;
-            } else if (text1.startsWith("9")) {
-                text1 = text1.replaceFirst("9", "60");
-            } else if (text1.startsWith("77")) {
-                text1 = text1.replaceFirst("77", "300");
-                continue;
-            } else if (text1.startsWith("7")) {
-                text1 = text1.replaceFirst("7", "00");
-            } else {
-                continue;
-            }
-            data.setShareId(text1);//开奖期数
-            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
-            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
-            String replace1 = text2.replace(",", "");
-            long l = Long.parseLong(replace1);
-            data.setShareNum(l);//开奖日期
-            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
-            String replace = text.replace("%", "");
-            double v = Double.parseDouble(replace);
-            data.setSharePercent(v);//开奖日期
-            dao.insertOrReplace(data);
-            if (count == 0) {
-                mTv.setText(data.toString());
-                Log.d("wxy " + count++, data.toString());
-            }
-        }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
-        mTv.setText("更新完毕");
-    }
 
-    void parseHtml5(Document document,ShareInfo5Dao dao) {
-        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
-        List<ShareInfo2> list = new ArrayList<>();
-        ShareInfo5 data;
-        int count = 0;
-        for (Element element : elements) {
-            data = new ShareInfo5();
-            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
-            if (text1.startsWith("30")) {
-                text1 = text1.replaceFirst("30", "688");
-                continue;
-            } else if (text1.startsWith("9")) {
-                text1 = text1.replaceFirst("9", "60");
-            } else if (text1.startsWith("77")) {
-                text1 = text1.replaceFirst("77", "300");
-                continue;
-            } else if (text1.startsWith("7")) {
-                text1 = text1.replaceFirst("7", "00");
-            } else {
-                continue;
-            }
-            data.setShareId(text1);//开奖期数
-            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
-            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
-            String replace1 = text2.replace(",", "");
-            long l = Long.parseLong(replace1);
-            data.setShareNum(l);//开奖日期
-            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
-            String replace = text.replace("%", "");
-            double v = Double.parseDouble(replace);
-            data.setSharePercent(v);//开奖日期
-            dao.insertOrReplace(data);
-            if (count == 0) {
-                mTv.setText(data.toString());
-                Log.d("wxy " + count++, data.toString());
-            }
-        }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
-        mTv.setText("更新完毕");
-    }
-
-    void parseHtml10(Document document,ShareInfo10Dao dao) {
-        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
-        List<ShareInfo10> list = new ArrayList<>();
-        ShareInfo10 data;
-        int count = 0;
-        for (Element element : elements) {
-            data = new ShareInfo10();
-            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
-            if (text1.startsWith("30")) {
-                text1 = text1.replaceFirst("30", "688");
-                continue;
-            } else if (text1.startsWith("9")) {
-                text1 = text1.replaceFirst("9", "60");
-            } else if (text1.startsWith("77")) {
-                text1 = text1.replaceFirst("77", "300");
-                continue;
-            } else if (text1.startsWith("7")) {
-                text1 = text1.replaceFirst("7", "00");
-            } else {
-                continue;
-            }
-            data.setShareId(text1);//开奖期数
-            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
-            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
-            String replace1 = text2.replace(",", "");
-            long l = Long.parseLong(replace1);
-            data.setShareNum(l);//开奖日期
-            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
-            String replace = text.replace("%", "");
-            double v = Double.parseDouble(replace);
-            data.setSharePercent(v);//开奖日期
-            dao.insertOrReplace(data);
-            if (count == 0) {
-                mTv.setText(data.toString());
-                Log.d("wxy " + count++, data.toString());
-            }
-        }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
-        mTv.setText("更新完毕");
-    }
-
-    void parseHtml20(Document document,ShareInfo20Dao dao) {
-        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
-        List<ShareInfo20> list = new ArrayList<>();
-        ShareInfo20 data;
-        int count = 0;
-        for (Element element : elements) {
-            data = new ShareInfo20();
-            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
-            if (text1.startsWith("30")) {
-                text1 = text1.replaceFirst("30", "688");
-                continue;
-            } else if (text1.startsWith("9")) {
-                text1 = text1.replaceFirst("9", "60");
-            } else if (text1.startsWith("77")) {
-                text1 = text1.replaceFirst("77", "300");
-                continue;
-            } else if (text1.startsWith("7")) {
-                text1 = text1.replaceFirst("7", "00");
-            } else {
-                continue;
-            }
-            data.setShareId(text1);//开奖期数
-            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
-            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
-            String replace1 = text2.replace(",", "");
-            long l = Long.parseLong(replace1);
-            data.setShareNum(l);//开奖日期
-            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
-            String replace = text.replace("%", "");
-            double v = Double.parseDouble(replace);
-            data.setSharePercent(v);//开奖日期
-            dao.insertOrReplace(data);
-            if (count == 0) {
-                mTv.setText(data.toString());
-                Log.d("wxy " + count++, data.toString());
-            }
-        }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
-        mTv.setText("更新完毕");
-    }
-
-    void parseHtml30(Document document,ShareInfo30Dao dao) {
-        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
-        List<ShareInfo30> list = new ArrayList<>();
-        ShareInfo30 data;
-        int count = 0;
-        for (Element element : elements) {
-            data = new ShareInfo30();
-            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
-            if (text1.startsWith("30")) {
-                text1 = text1.replaceFirst("30", "688");
-                continue;
-            } else if (text1.startsWith("9")) {
-                text1 = text1.replaceFirst("9", "60");
-            } else if (text1.startsWith("77")) {
-                text1 = text1.replaceFirst("77", "300");
-                continue;
-            } else if (text1.startsWith("7")) {
-                text1 = text1.replaceFirst("7", "00");
-            } else {
-                continue;
-            }
-            data.setShareId(text1);//开奖期数
-            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
-            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
-            String replace1 = text2.replace(",", "");
-            long l = Long.parseLong(replace1);
-            data.setShareNum(l);//开奖日期
-            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
-            String replace = text.replace("%", "");
-            double v = Double.parseDouble(replace);
-            data.setSharePercent(v);//开奖日期
-            dao.insertOrReplace(data);
-            if (count == 0) {
-                mTv.setText(data.toString());
-                Log.d("wxy " + count++, data.toString());
-            }
-        }
-        if (--qCount > 0) {
-            getDatas("sz");
-            return;
-        }
-        mTv.setText("更新完毕");
-    }
 }

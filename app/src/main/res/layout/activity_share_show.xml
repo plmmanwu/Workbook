@@ -7,6 +7,11 @@
     tools:context=".share.ShareShowActivity"
     android:orientation="vertical">
 
+    <CalendarView
+        android:id="@+id/cav"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+
     <Button
         android:layout_marginTop="50dp"
         android:layout_width="match_parent"
