@@ -1,6 +1,7 @@
 package com.wlwoon.workbook.share;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.Generated;
 
@@ -8,78 +9,119 @@ import org.greenrobot.greendao.annotation.Generated;
  * Created by wxy on 2021/4/1.
  */
 
-@Entity(nameInDb = "ShareInfo_DB")
-public class ShareInfo extends BaseInfo{
+@Entity(nameInDb = "ShareInfo_DB",indexes = {
+        @Index(value = "date DESC, shareId DESC", unique = true)
+})
+public class ShareInfo extends BaseInfo {
 
-    @Index(unique = true)
+    @Id(autoincrement = true)
+    Long id;
     String shareId;//93556
     String shareName;//海興電力
     long shareNum;//11,528,212
     double sharePercent;//2.35%
+    String date;
+    //时间戳
+    long time;
 
 
-    @Generated(hash = 1250594665)
-    public ShareInfo(String shareId, String shareName, long shareNum,
-            double sharePercent) {
-        this.shareId = shareId;
-        this.shareName = shareName;
-        this.shareNum = shareNum;
-        this.sharePercent = sharePercent;
-    }
+@Generated(hash = 665195297)
+public ShareInfo(Long id, String shareId, String shareName, long shareNum,
+        double sharePercent, String date, long time) {
+    this.id = id;
+    this.shareId = shareId;
+    this.shareName = shareName;
+    this.shareNum = shareNum;
+    this.sharePercent = sharePercent;
+    this.date = date;
+    this.time = time;
+}
 
 
-    @Generated(hash = 980962533)
-    public ShareInfo() {
-    }
+@Generated(hash = 980962533)
+public ShareInfo() {
+}
 
 
     @Override
     public String toString() {
         return "ShareInfo{" +
-                "shareId='" + shareId + '\'' +
+                "id=" + id +
+                ", shareId='" + shareId + '\'' +
                 ", shareName='" + shareName + '\'' +
-                ", shareNum='" + shareNum + '\'' +
-                ", sharePercent='" + sharePercent + '\'' +
+                ", shareNum=" + shareNum +
+                ", sharePercent=" + sharePercent +
+                ", date='" + date + '\'' +
                 '}';
     }
 
 
-    public String getShareId() {
-        return this.shareId;
-    }
+public Long getId() {
+    return this.id;
+}
 
 
-    public void setShareId(String shareId) {
-        this.shareId = shareId;
-    }
+public void setId(Long id) {
+    this.id = id;
+}
 
 
-    public String getShareName() {
-        return this.shareName;
-    }
+public String getShareId() {
+    return this.shareId;
+}
 
 
-    public void setShareName(String shareName) {
-        this.shareName = shareName;
-    }
+public void setShareId(String shareId) {
+    this.shareId = shareId;
+}
 
 
-    public long getShareNum() {
-        return this.shareNum;
-    }
+public String getShareName() {
+    return this.shareName;
+}
 
 
-    public void setShareNum(long shareNum) {
-        this.shareNum = shareNum;
-    }
+public void setShareName(String shareName) {
+    this.shareName = shareName;
+}
 
 
-    public double getSharePercent() {
-        return this.sharePercent;
-    }
+public long getShareNum() {
+    return this.shareNum;
+}
 
 
-    public void setSharePercent(double sharePercent) {
-        this.sharePercent = sharePercent;
-    }
+public void setShareNum(long shareNum) {
+    this.shareNum = shareNum;
+}
+
+
+public double getSharePercent() {
+    return this.sharePercent;
+}
+
+
+public void setSharePercent(double sharePercent) {
+    this.sharePercent = sharePercent;
+}
+
+
+public String getDate() {
+    return this.date;
+}
+
+
+public void setDate(String date) {
+    this.date = date;
+}
+
+
+public long getTime() {
+    return this.time;
+}
+
+
+public void setTime(long time) {
+    this.time = time;
+}
 }

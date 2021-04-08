@@ -45,7 +45,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
-public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
+public class ShareActivity3 extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
 
 
     String url = "http://www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=sh&t=sh";
@@ -62,7 +62,7 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
     @BindView(R.id.cv)
     CalendarView mCv;
 
-    private ShareInfoDao mShareInfosDao;
+    private ShareInfosDao mShareInfosDao;
     private Disposable mDisposable;
 
     @Override
@@ -180,28 +180,23 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
                 .subscribe(new Consumer<List<ShareInfo>>() {
                     @Override
                     public void accept(List<ShareInfo> map) throws Exception {
-                        List<ShareInfo> list = mShareInfosDao.queryBuilder().where(ShareInfoDao.Properties.Date.eq(holdDate)).build().list();
-                        if (list != null && list.size() > 0) {
-                            mTv.setText(holdDate + "==已存在");
+
+                        List<ShareInfos> infos = mShareInfosDao.queryBuilder().where(ShareInfosDao.Properties.Date.eq(holdDate)).build().list();
+                        if (infos!=null&&infos.size()>0){
                             if (days > 1) {
                                 Date date = new Date(System.currentTimeMillis() - days * 24 * 60 * 60 * 1000l);
                                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
                                 time = dateFormat.format(date);
                                 getDatas();
                                 days--;
-                            } else {
-                                mTv.setText(holdDate + "==更新完毕");
                             }
-                            return;
+                            return ;
                         }
-                        for (ShareInfo shareInfo : map) {
-                            shareInfo.setDate(holdDate);
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-                            Date date = dateFormat.parse(holdDate);
-                            long time = date.getTime();
-                            shareInfo.setTime(time);
-                            mShareInfosDao.insertOrReplace(shareInfo);
-                        }
+
+                        ShareInfos shareInfos = new ShareInfos();
+                        shareInfos.setDate(holdDate);
+                        shareInfos.setInfo(map);
+                        mShareInfosDao.insertOrReplace(shareInfos);
                         mTv.setText(holdDate + "==更新完毕"+days);
                         if (days > 1) {
                             Date date = new Date(System.currentTimeMillis() - days * 24 * 60 * 60 * 1000l);
@@ -296,7 +291,7 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
 
     private void initDB() {
         DaoSession daoSession = App.getDaoSession();
-        mShareInfosDao = daoSession.getShareInfoDao();
+        mShareInfosDao = daoSession.getShareInfosDao();
 
     }
 
@@ -375,5 +370,54 @@ public class ShareActivity extends BaseActivity implements RadioGroup.OnCheckedC
 
         }
     }
+
+    void parseHtml(Document document, ShareInfoDao dao) {
+
+        String hold = document.select("div[id=pnlResult] > h2 > span").text();//持有日期 持股日期: 2021/04/01
+        String[] s = hold.split(" ");
+        String holdDate = s[1];
+        ShareInfos shareInfos = new ShareInfos();
+        shareInfos.date = holdDate;
+
+
+        Elements elements = document.select("table[id=mutualmarket-result] > tbody > tr");
+        List<ShareInfo> list = new ArrayList<>();
+        ShareInfo data;
+        int count = 0;
+        for (Element element : elements) {
+            data = new ShareInfo();
+            String text1 = element.select("td[class=col-stock-code] > div[class=mobile-list-body]").text();
+            if (text1.startsWith("30")) {
+                text1 = text1.replaceFirst("30", "688");
+                continue;
+            } else if (text1.startsWith("9")) {
+                text1 = text1.replaceFirst("9", "60");
+            } else if (text1.startsWith("77")) {
+                text1 = text1.replaceFirst("77", "300");
+                continue;
+            } else if (text1.startsWith("7")) {
+                text1 = text1.replaceFirst("7", "00");
+            } else {
+                continue;
+            }
+            data.setShareId(text1);//开奖期数
+            data.setShareName(element.select("td[class=col-stock-name] > div[class=mobile-list-body]").text());//开奖日期
+            String text2 = element.select("td[class=col-shareholding] > div[class=mobile-list-body]").text();
+            String replace1 = text2.replace(",", "");
+            long l = Long.parseLong(replace1);
+            data.setShareNum(l);//开奖日期
+            String text = element.select("td[class=col-shareholding-percent] > div[class=mobile-list-body]").text();
+            String replace = text.replace("%", "");
+            double v = Double.parseDouble(replace);
+            data.setSharePercent(v);//开奖日期
+            dao.insertOrReplace(data);
+            if (count == 0) {
+                mTv.setText(data.toString());
+                Log.d("wxy " + count++, data.toString());
+            }
+        }
+        mTv.setText("更新完毕");
+    }
+
 
 }

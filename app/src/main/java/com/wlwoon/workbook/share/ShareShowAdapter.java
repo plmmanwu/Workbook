@@ -51,6 +51,26 @@ public class ShareShowAdapter extends RecyclerView.Adapter<ShareShowAdapter.VH> 
         holder.tv_name.setText(shareInfo.getShareName());
         holder.tv_num.setText(shareInfo.getShareNum()+"");
         holder.tv_percent.setText(shareInfo.getSharePercent()+"");
+        holder.tv_time.setText(shareInfo.getDate());
+
+        holder.tv_name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnClickNameListener!=null) {
+                    mOnClickNameListener.clickName(shareInfo);
+                }
+            }
+        });
+    }
+
+    public interface OnClickNameListener{
+        void clickName(ShareInfo shareInfo);
+    }
+
+    OnClickNameListener mOnClickNameListener;
+
+    public void setOnClickNameListener(OnClickNameListener onClickNameListener) {
+        mOnClickNameListener = onClickNameListener;
     }
 
     @Override
@@ -68,6 +88,7 @@ public class ShareShowAdapter extends RecyclerView.Adapter<ShareShowAdapter.VH> 
         private final TextView mTvCode;
         private final TextView tv_name;
         private final TextView tv_num;
+        private final TextView tv_time;
         private final TextView tv_percent;
 
         public VH(@NonNull View itemView) {
@@ -75,6 +96,7 @@ public class ShareShowAdapter extends RecyclerView.Adapter<ShareShowAdapter.VH> 
             mTvCode = itemView.findViewById(R.id.tv_code);
             tv_name = itemView.findViewById(R.id.tv_name);
             tv_num = itemView.findViewById(R.id.tv_num);
+            tv_time = itemView.findViewById(R.id.tv_time);
             tv_percent = itemView.findViewById(R.id.tv_percent);
         }
     }

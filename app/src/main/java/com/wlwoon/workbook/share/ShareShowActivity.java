@@ -8,6 +8,7 @@ import android.widget.CalendarView;
 
 import com.wlwoon.base.BaseActivity;
 import com.wlwoon.workbook.App;
+import com.wlwoon.workbook.LineChartDialog;
 import com.wlwoon.workbook.R;
 
 import java.text.SimpleDateFormat;
@@ -21,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class ShareShowActivity extends BaseActivity {
+public class ShareShowActivity extends BaseActivity implements ShareShowAdapter.OnClickNameListener {
 
     @BindView(R.id.rc)
     RecyclerView mRc;
@@ -30,11 +31,8 @@ public class ShareShowActivity extends BaseActivity {
     @BindView(R.id.cav)
     CalendarView mCav;
     private ShareShowAdapter mAdapter;
-    private ShareInfosDao mShareInfoDao;
-    List<ShareInfos> mShareInfoList;
-
-    List<ShareInfo> mInfoList;
-
+    private ShareInfoDao mShareInfoDao;
+    List<ShareInfo> mShareInfoList;
     @Override
     protected int getLayoutId() {
         return R.layout.activity_share_show;
@@ -45,7 +43,7 @@ public class ShareShowActivity extends BaseActivity {
     @Override
     protected void initData(Bundle savedInstanceState, Bundle extras) {
         DaoSession daoSession = App.getDaoSession();
-        mShareInfoDao = daoSession.getShareInfosDao();
+        mShareInfoDao = daoSession.getShareInfoDao();
         initDb();
         int index = extras.getInt("index");
         Date date = new Date(System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000);
@@ -99,7 +97,7 @@ public class ShareShowActivity extends BaseActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfosDao.Properties.Date.eq(time)).build().list();
+                mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfoDao.Properties.Date.eq(time)).orderDesc(ShareInfoDao.Properties.SharePercent).build().list();
 //                mShareInfoList = mShareInfoDao.queryBuilder().orderDesc(ShareInfoDao.Properties.SharePercent).build().list();
                 mBtnShow.setText(mShareInfoList.size() + "");
                 Log.d("wxy ==", mShareInfoList.size() + "");
@@ -112,8 +110,10 @@ public class ShareShowActivity extends BaseActivity {
 //        mRc.setLayoutManager(new GridLayoutManager(this,4));
 
         mRc.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new ShareShowAdapter(mInfoList);
+        mAdapter = new ShareShowAdapter(mShareInfoList);
         mRc.setAdapter(mAdapter);
+        mAdapter.setOnClickNameListener(this);
+
     }
 
     @SuppressLint("CheckResult")
@@ -122,14 +122,24 @@ public class ShareShowActivity extends BaseActivity {
         if (mShareInfoList==null||mShareInfoList.size()==0) {
             return;
         }
-        mInfoList=mShareInfoList.get(0).getInfo();
-        mBtnShow.setText(mInfoList.size()+"");
-        Collections.sort(mInfoList, new Comparator<ShareInfo>() {
+//        mInfoList=mShareInfoList.get(0).getInfo();
+        mBtnShow.setText(mShareInfoList.size()+"");
+        Collections.sort(mShareInfoList, new Comparator<ShareInfo>() {
             @Override
             public int compare(ShareInfo o1, ShareInfo o2) {
                 return ((int) ((o2.getSharePercent() - o1.getSharePercent()) * 100));
             }
         });
-        mAdapter.addDatas(mInfoList);
+        mAdapter.addDatas(mShareInfoList);
+    }
+
+    @Override
+    public void clickName(ShareInfo shareInfo) {
+        String shareId = shareInfo.getShareId();
+        mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfoDao.Properties.ShareId.eq(shareId)).orderDesc(ShareInfoDao.Properties.Time).build().list();
+        mAdapter.addDatas(mShareInfoList);
+
+        LineChartDialog dialog = new LineChartDialog(this);
+        dialog.setData(mShareInfoList);
     }
 }
