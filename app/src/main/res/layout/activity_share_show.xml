@@ -5,12 +5,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".share.ShareShowActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="60dp">
 
     <CalendarView
+        android:visibility="gone"
         android:id="@+id/cav"
         android:layout_width="match_parent"
         android:layout_height="350dp" />
+    <LinearLayout
+        android:id="@+id/ll_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/shape_bg_white_corner_4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp">
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape_bg_grey"
+            android:drawableLeft="@mipmap/search_icon"
+            android:gravity="center_vertical"
+            android:hint="name or code"
+            android:paddingVertical="8dp"
+            android:paddingLeft="9dp"
+            android:singleLine="true"
+            android:textColor="#ff999999"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/iv_del"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@mipmap/del"
+            />
+
+    </LinearLayout>
 
     <Button
         android:layout_marginTop="50dp"
@@ -18,6 +57,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/btn_show"
         android:text="显示"
+        android:visibility="gone"
         />
 
     <androidx.recyclerview.widget.RecyclerView

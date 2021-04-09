@@ -20,6 +20,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IFillFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.wlwoon.workbook.chart.MyMarkerView;
 import com.wlwoon.workbook.share.ShareInfo;
 
 import java.util.ArrayList;
@@ -38,14 +39,14 @@ public class LineChartDialog extends Dialog {
     int days = 1;
     public LineChartDialog(@NonNull Context context) {
         super(context, R.style.DialogAnimFromBottmoTheme);
-        this.setCanceledOnTouchOutside(false);
+//        this.setCanceledOnTouchOutside(false);
         this.show();
         Window dialogWindow = this.getWindow();
         dialogWindow.setGravity(Gravity.BOTTOM);
         dialogWindow.setWindowAnimations(R.style.DialogAnimFromBottmo);
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         dialogWindow.setAttributes(lp);
     }
 
@@ -77,7 +78,11 @@ public class LineChartDialog extends Dialog {
     private void initLineChart() {
         mLinechart.getDescription().setEnabled(false);
         mLinechart.setDrawGridBackground(false);
+        MyMarkerView mv = new MyMarkerView(getContext(), R.layout.custom_marker_view);
 
+        // Set the marker to the chart
+        mv.setChartView(mLinechart);
+        mLinechart.setMarker(mv);
         XAxis xAxis = mLinechart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 ////        xAxis.setTypeface(mTf);
@@ -118,7 +123,7 @@ public class LineChartDialog extends Dialog {
         ArrayList<Entry> values1 = new ArrayList<>();
 
         for (int i = 0; i < infos.size(); i++) {
-            values1.add(new Entry(i, ((float) infos.get(i).getSharePercent())));
+            values1.add(new Entry(i, ((float) infos.get(i).getSharePercent()),infos.get(i)));
         }
 
         if (mLinechart.getData() != null &&
@@ -139,11 +144,14 @@ public class LineChartDialog extends Dialog {
     }
 
     public void setData(List<ShareInfo> shareInfos) {
+        if (shareInfos.size()>180) {
+            shareInfos = shareInfos.subList(0, 180);
+        }
 
         ArrayList<Entry> values = new ArrayList<>();
 
         for (int i = 0; i < shareInfos.size(); i++) {
-            values.add(new Entry(i, ((float) shareInfos.get(i).getSharePercent())));
+            values.add(new Entry(i, ((float) shareInfos.get(i).getSharePercent()),shareInfos.get(i)));
         }
 
         LineDataSet set1;
@@ -165,8 +173,8 @@ public class LineChartDialog extends Dialog {
             set1.enableDashedLine(10f, 5f, 0f);
 
             // black lines and points
-            set1.setColor(Color.BLACK);
-            set1.setCircleColor(Color.BLACK);
+            set1.setColor(Color.RED);//图标
+            set1.setCircleColor(Color.YELLOW);//点
 
             // line thickness and point size
             set1.setLineWidth(1f);
@@ -202,7 +210,7 @@ public class LineChartDialog extends Dialog {
 //                set1.setFillDrawable(drawable);
 //            } else {
 //            }
-            set1.setFillColor(Color.BLACK);
+//            set1.setFillColor(Color.GREEN);//填充
 
             ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1); // add the data sets

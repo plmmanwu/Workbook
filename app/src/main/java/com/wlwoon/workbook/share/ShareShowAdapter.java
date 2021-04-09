@@ -61,10 +61,21 @@ public class ShareShowAdapter extends RecyclerView.Adapter<ShareShowAdapter.VH> 
                 }
             }
         });
+
+        holder.mTvCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnClickNameListener!=null) {
+                    mOnClickNameListener.clickCode(shareInfo);
+                }
+            }
+        });
     }
 
     public interface OnClickNameListener{
         void clickName(ShareInfo shareInfo);
+
+        void clickCode(ShareInfo shareInfo);
     }
 
     OnClickNameListener mOnClickNameListener;
