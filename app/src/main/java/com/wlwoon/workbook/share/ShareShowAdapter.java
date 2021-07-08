@@ -49,8 +49,8 @@ public class ShareShowAdapter extends RecyclerView.Adapter<ShareShowAdapter.VH> 
         ShareInfo shareInfo = list.get(position);
         holder.mTvCode.setText(shareInfo.getShareId());
         holder.tv_name.setText(shareInfo.getShareName());
-        holder.tv_num.setText(shareInfo.getShareNum()+"");
-        holder.tv_percent.setText(shareInfo.getSharePercent()+"");
+        holder.tv_num.setText(shareInfo.getShareNum()/100 +"");
+        holder.tv_percent.setText(shareInfo.getSharePercent()+" %");
         holder.tv_time.setText(shareInfo.getDate());
 
         holder.tv_name.setOnClickListener(new View.OnClickListener() {

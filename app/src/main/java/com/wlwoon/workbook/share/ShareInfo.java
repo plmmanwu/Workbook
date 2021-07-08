@@ -1,9 +1,9 @@
 package com.wlwoon.workbook.share;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
-import org.greenrobot.greendao.annotation.Generated;
 
 /**
  * Created by wxy on 2021/4/1.
@@ -20,6 +20,7 @@ public class ShareInfo extends BaseInfo {
     String shareName;//海興電力
     long shareNum;//11,528,212
     double sharePercent;//2.35%
+//    @Convert(columnType = String.class,converter = Date_Converter.class)
     String date;
     //时间戳
     long time;

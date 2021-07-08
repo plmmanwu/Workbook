@@ -32,4 +32,21 @@
         <item name="android:windowExitAnimation">@anim/dialog_out_bottom</item>
     </style>
 
+    <style name="dialog_style" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- 设置Dialog弹出样式 -->
+    <style name="BaseDialog" parent="android:Theme.Dialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <!--设置全屏-->
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
 </resources>

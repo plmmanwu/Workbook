@@ -78,6 +78,7 @@ public class LineChartDialog extends Dialog {
     private void initLineChart() {
         mLinechart.getDescription().setEnabled(false);
         mLinechart.setDrawGridBackground(false);
+//        mLinechart.set
         MyMarkerView mv = new MyMarkerView(getContext(), R.layout.custom_marker_view);
 
         // Set the marker to the chart
@@ -109,39 +110,6 @@ public class LineChartDialog extends Dialog {
 
     }
 
-    void setDatas(List<ShareInfo> shareInfos) {
-
-        mLinechart.setData(generateDataLine(shareInfos));
-
-        // do not forget to refresh the chart
-        mLinechart.invalidate();
-
-    }
-
-    private LineData generateDataLine(List<ShareInfo> infos) {
-
-        ArrayList<Entry> values1 = new ArrayList<>();
-
-        for (int i = 0; i < infos.size(); i++) {
-            values1.add(new Entry(i, ((float) infos.get(i).getSharePercent()),infos.get(i)));
-        }
-
-        if (mLinechart.getData() != null &&
-                mLinechart.getData().getDataSetCount() > 0) {
-            LineDataSet set1 = (LineDataSet) mLinechart.getData().getDataSetByIndex(0);
-            set1.setValues(values1);
-            mLinechart.getData().notifyDataChanged();
-            mLinechart.notifyDataSetChanged();
-        }
-        LineDataSet d1 = new LineDataSet(values1, "New DataSet " + ", (1)");
-        d1.setLineWidth(2.5f);
-        d1.setCircleRadius(4.5f);
-        d1.setHighLightColor(Color.rgb(244, 117, 117));
-        d1.setDrawValues(false);
-        ArrayList<ILineDataSet> sets = new ArrayList<>();
-        sets.add(d1);
-        return new LineData(sets);
-    }
 
     public void setData(List<ShareInfo> shareInfos) {
         if (shareInfos.size()>180) {
@@ -165,7 +133,7 @@ public class LineChartDialog extends Dialog {
             mLinechart.notifyDataSetChanged();
         } else {
             // create a dataset and give it a type
-            set1 = new LineDataSet(values, "DataSet 1");
+            set1 = new LineDataSet(values, "天數");
 
             set1.setDrawIcons(false);
 

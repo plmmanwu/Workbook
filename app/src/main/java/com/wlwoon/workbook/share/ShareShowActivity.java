@@ -18,6 +18,7 @@ import com.wlwoon.workbook.App;
 import com.wlwoon.workbook.DeviceUtils;
 import com.wlwoon.workbook.LineChartDialog;
 import com.wlwoon.workbook.R;
+import com.wlwoon.workbook.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -261,8 +262,7 @@ public class ShareShowActivity extends BaseActivity implements ShareShowAdapter.
     @Override
     public void clickName(ShareInfo shareInfo) {
         String shareId = shareInfo.getShareId();
-        mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfoDao.Properties.ShareId.eq(shareId)).orderDesc(ShareInfoDao.Properties.Time).build().list();
-
+        mShareInfoList = mShareInfoDao.queryBuilder().where(ShareInfoDao.Properties.ShareId.eq(shareId),ShareInfoDao.Properties.Time.ge(Utils.get3MonthAgoTime())).orderAsc(ShareInfoDao.Properties.Time).build().list();
         LineChartDialog dialog = new LineChartDialog(this);
         dialog.setData(mShareInfoList);
     }

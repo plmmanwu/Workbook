@@ -30,7 +30,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".share.ShareShowActivity"></activity>
+        <activity android:name=".video.VideoActivity"></activity>
+        <activity android:name=".share.ShareShowActivity" />
         <activity android:name=".share.ShareActivity" />
         <activity android:name=".CSignView" />
         <activity android:name=".LineBarChartActivity" />

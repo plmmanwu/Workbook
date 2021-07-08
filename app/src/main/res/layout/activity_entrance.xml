@@ -21,8 +21,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
+            android:text="北上走向"
             android:layout_marginBottom="10dp"
             android:id="@+id/btn_chart2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:text="无缝切换视频"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/btn3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

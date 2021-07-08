@@ -8,6 +8,7 @@ public class Constance {
 
     public static final String url = "http://gank.io/";
     public static final String shareUrl = "https://www.hkexnews.hk/";//?t=sh/sz
+    public static final String hookUrl = "https://oapi.dingtalk.com/robot/";//?t=sh/sz
 
     public static final String sortUp= "asc";
     public static final String sortDown= "desc";
